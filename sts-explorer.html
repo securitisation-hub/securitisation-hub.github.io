@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>STS Deal Explorer — European Securitisation Intelligence Hub</title>
-<meta name="description" content="Explore 1,026 STS-notified securitisation deals from the ESMA register. Filter by asset class, country, originator, and ISIN.">
+<title>STS Securitisation Explorer — European Securitisation Intelligence Hub</title>
+<meta name="description" content="Explore 414 public STS securitisations with tranche-level data, ECB eligibility, and originator details.">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -19,18 +19,15 @@ a{color:var(--accent);text-decoration:none}
 .nav a.nav-link{padding:12px 16px;font-size:13px;color:var(--fg2);transition:color .15s;white-space:nowrap}
 .nav a.nav-link:hover{color:var(--fg)}
 .nav a.nav-link.active{color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
-.nav .nav-link.disabled{pointer-events:none;opacity:.35}
 
 #app{max-width:1440px;margin:0 auto;padding:20px 20px 80px}
 .header h1{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
 .header h1 span{color:var(--accent)}
 .header .sub{font-size:13px;color:var(--fg2);margin-bottom:16px}
-.header .sub b{color:var(--fg)}
-.source-tag{display:inline-block;font-size:10px;background:rgba(240,160,48,.12);color:var(--accent);padding:2px 8px;border-radius:4px;margin-left:8px}
 
 /* Stats */
-.stats{display:flex;flex-wrap:wrap;gap:12px 24px;margin-bottom:20px}
-.stat{background:var(--bg2);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:14px 18px;min-width:140px;flex:1}
+.stats{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.stat{background:var(--bg2);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:14px 18px;min-width:130px;flex:1}
 .stat .val{font-size:26px;font-weight:700;letter-spacing:-.03em;color:var(--accent)}
 .stat .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--fg2);margin-top:2px}
 
@@ -41,365 +38,514 @@ a{color:var(--accent);text-decoration:none}
 .ctrl select,.ctrl input{background:var(--bg2);color:var(--fg);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 12px;font-size:13px;font-family:inherit;min-width:130px}
 .ctrl select:focus,.ctrl input:focus{outline:none;border-color:var(--accent)}
 .actions{display:flex;gap:8px;align-items:flex-end;margin-left:auto}
-.btn{padding:7px 16px;font-size:12px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--fg2);cursor:pointer;white-space:nowrap}
+.btn{padding:7px 16px;font-size:12px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--fg2);cursor:pointer;white-space:nowrap;font-family:inherit}
 .btn:hover{color:var(--fg);border-color:var(--fg2)}
 .btn.active{background:rgba(240,160,48,.15);border-color:rgba(240,160,48,.3);color:var(--accent)}
 .btn-accent{background:rgba(240,160,48,.15);border-color:rgba(240,160,48,.3);color:var(--accent)}
 .btn-accent:hover{background:rgba(240,160,48,.25);border-color:rgba(240,160,48,.5)}
 
 /* Charts */
-.panels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
-.panel{background:var(--bg2);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:16px}
-.panel h3{font-size:12px;font-weight:600;margin-bottom:10px;color:var(--fg2)}
-.panel canvas{width:100%!important;max-height:260px}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.chart-box{background:var(--bg2);border:1px solid rgba(255,255,255,.04);border-radius:12px;padding:16px}
+.chart-box h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg2);margin-bottom:12px}
+.chart-box canvas{width:100%!important;max-height:260px}
 
-/* Results */
-.results-bar{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.results-count{font-size:12px;color:var(--fg2)}
+/* Result count */
+.result-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;flex-wrap:wrap}
+.result-count{font-size:13px;color:var(--fg2)}
+.result-count b{color:var(--fg)}
+.view-toggle{display:flex;gap:4px}
+.view-toggle .btn{padding:5px 12px;font-size:11px}
 
-/* Cards */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
-.card{background:var(--bg2);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:16px;cursor:pointer;transition:all .15s}
-.card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-1px)}
-.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
-.card-title{font-size:14px;font-weight:600;line-height:1.3;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.card-originator{font-size:12px;color:var(--fg2);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.card-meta{display:flex;flex-wrap:wrap;gap:6px;font-size:10px}
-.badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap}
-.badge-asset{border:1px solid}
-.badge-public{background:rgba(34,204,136,.12);color:#22cc88;border:1px solid rgba(34,204,136,.25)}
-.badge-private{background:rgba(136,136,148,.12);color:#888894;border:1px solid rgba(136,136,148,.25)}
-.badge-abcp{background:rgba(68,136,255,.12);color:#4488ff;border:1px solid rgba(68,136,255,.25)}
-.badge-nonabcp{background:rgba(187,102,238,.12);color:#bb66ee;border:1px solid rgba(187,102,238,.25)}
-.tag{padding:2px 8px;border-radius:4px;background:rgba(255,255,255,.04);color:var(--fg2);font-size:10px}
-.card-footer{margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;font-size:10px;color:var(--fg2)}
+/* Card grid */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.card{background:var(--bg2);border:1px solid rgba(255,255,255,.04);border-radius:10px;padding:16px;cursor:pointer;transition:border-color .15s,transform .1s}
+.card:hover{border-color:rgba(240,160,48,.25);transform:translateY(-1px)}
+.card-name{font-size:14px;font-weight:600;margin-bottom:6px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-orig{font-size:12px;color:var(--fg2);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-orig svg{width:12px;height:12px;vertical-align:-1px;margin-right:4px;fill:var(--fg2)}
+.card-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;line-height:1.5}
+.badge-ac{color:#fff}
+.badge-tranche{background:rgba(255,255,255,.06);color:var(--fg2)}
+.badge-ecb-yes{background:rgba(34,204,136,.15);color:var(--green)}
+.badge-ecb-no{background:rgba(255,255,255,.04);color:var(--fg2)}
+.card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:var(--fg2)}
+.card-country{display:flex;align-items:center;gap:4px}
+.card-verifier{font-size:10px;color:var(--fg2);opacity:.7;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* Table view */
-.tbl-wrap{overflow-x:auto;display:none}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg2);padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;white-space:nowrap;user-select:none}
-th:hover{color:var(--fg)}
-td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.03);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-tr:hover td{background:rgba(255,255,255,.02)}
-tr{cursor:pointer}
+.table-wrap{overflow-x:auto;margin-bottom:16px}
+table.data-table{width:100%;border-collapse:collapse;font-size:12px}
+table.data-table th{text-align:left;padding:8px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg2);border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;white-space:nowrap;user-select:none}
+table.data-table th:hover{color:var(--fg)}
+table.data-table th .sort-arrow{margin-left:4px;font-size:8px}
+table.data-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.03);white-space:nowrap}
+table.data-table tr{cursor:pointer;transition:background .1s}
+table.data-table tr:hover{background:rgba(240,160,48,.05)}
 
 /* Modal */
-.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);z-index:1000;backdrop-filter:blur(4px);justify-content:center;align-items:flex-start;padding:40px 20px;overflow-y:auto}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:200;justify-content:center;align-items:flex-start;padding:40px 20px;overflow-y:auto}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:14px;max-width:750px;width:100%;padding:28px;position:relative;animation:modalIn .2s ease}
-@keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.modal-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.06);border:none;color:var(--fg2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
-.modal-close:hover{background:rgba(255,255,255,.12);color:var(--fg)}
+.modal{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:14px;max-width:1000px;width:100%;padding:28px;position:relative;animation:modalIn .2s ease}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--fg2);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:4px}
+.modal-close:hover{color:var(--fg);background:rgba(255,255,255,.05)}
 .modal h2{font-size:20px;font-weight:700;margin-bottom:4px;padding-right:40px}
 .modal .modal-sub{font-size:13px;color:var(--fg2);margin-bottom:16px}
-.modal-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
-.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
-.modal-field{background:rgba(255,255,255,.03);border-radius:8px;padding:10px 12px}
-.modal-field.full{grid-column:1/-1}
-.modal-field .mf-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg2);margin-bottom:2px}
-.modal-field .mf-value{font-size:13px;font-weight:500;word-break:break-all}
-.isin-list{display:flex;flex-wrap:wrap;gap:6px}
-.isin-tag{font-family:'SF Mono',Monaco,Consolas,monospace;font-size:11px;background:rgba(68,136,255,.1);color:var(--blue);padding:3px 8px;border-radius:4px}
+.modal-info{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.modal-info-card{background:var(--bg3);border-radius:8px;padding:14px}
+.modal-info-card h4{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg2);margin-bottom:8px}
+.modal-info-card p{font-size:12px;line-height:1.6}
+.modal-info-card p span.lbl{color:var(--fg2);margin-right:4px}
+
+/* Tranche table */
+.tranche-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px}
+.tranche-table th{text-align:left;padding:8px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--fg2);border-bottom:1px solid rgba(255,255,255,.08)}
+.tranche-table td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.03)}
+.tranche-table tr.ecb-row{background:rgba(34,204,136,.06)}
+.tranche-table tr.ecb-row td:nth-child(2){color:var(--green);font-weight:600}
+.isin-copy{cursor:pointer;padding:2px 6px;border-radius:3px;font-family:'SF Mono',Consolas,monospace;font-size:11px;transition:background .15s}
+.isin-copy:hover{background:rgba(240,160,48,.15)}
+.isin-copy::after{content:'';display:inline-block;width:0;overflow:hidden;transition:width .15s}
+.isin-copy.copied{color:var(--green)}
+.isin-copy.copied::after{content:' ✓';width:14px}
+.tranche-summary{font-size:12px;color:var(--fg2);padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}
+.tranche-summary b{color:var(--fg)}
 
 /* Footer */
-.footer{margin-top:30px;text-align:center;font-size:11px;color:var(--fg2);padding:16px 0;border-top:1px solid rgba(255,255,255,.04)}
-.disclaimer{margin-top:20px;padding:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);border-radius:8px;font-size:10px;color:var(--fg2);line-height:1.5}
+.footer{text-align:center;padding:40px 20px;font-size:11px;color:var(--fg2);line-height:1.8;border-top:1px solid rgba(255,255,255,.04);margin-top:40px}
+.footer a{color:var(--accent)}
 
-@media(max-width:900px){.panels{grid-template-columns:1fr}.cards-grid{grid-template-columns:1fr}.modal-grid{grid-template-columns:1fr}.stats{gap:8px 12px}}
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid rgba(255,255,255,.1);color:var(--fg);padding:8px 20px;border-radius:8px;font-size:12px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:300}
+.toast.show{opacity:1}
+
+@media(max-width:900px){
+  .charts{grid-template-columns:1fr}
+  .cards{grid-template-columns:1fr}
+  .modal-info{grid-template-columns:1fr}
+  .stats{gap:8px}
+  .stat{min-width:100px;padding:10px 12px}
+  .stat .val{font-size:20px}
+}
+@media(max-width:600px){
+  .filters{flex-direction:column;align-items:stretch}
+  .actions{margin-left:0;justify-content:flex-end}
+  .ctrl select,.ctrl input{min-width:0;width:100%}
+}
 </style>
 </head>
 <body>
+
 <nav class="nav">
   <div class="nav-brand">EU Sec<span>Hub</span></div>
   <a href="index.html" class="nav-link">Home</a>
   <a href="ecb-dashboard.html" class="nav-link">Market Monitor</a>
   <a href="sts-explorer.html" class="nav-link active">STS Explorer</a>
-  <a href="ecb-eligible.html" class="nav-link">ECB Eligibility</a>
   <a href="originators.html" class="nav-link">Originators</a>
 </nav>
+
 <div id="app">
   <div class="header">
-    <h1>STS Deal <span>Explorer</span> <span class="source-tag">ESMA Register</span></h1>
-    <div class="sub">Browse <b id="totalLabel">1,026</b> STS-notified securitisation deals from the <b>ESMA STS Register</b>. Filter by asset class, country, originator, and ISIN.</div>
+    <h1>European <span>STS Securitisation</span> Explorer</h1>
+    <div class="sub">414 public securitisations with tranche-level data, ECB eligibility, and originator details</div>
   </div>
+
   <div class="stats" id="stats"></div>
+
   <div class="filters">
-    <div class="ctrl"><label>Search</label><input type="text" id="fSearch" placeholder="Name, originator, ISIN…"></div>
-    <div class="ctrl"><label>Type</label><select id="fType"><option value="">All Types</option><option>PUBLIC</option><option>PRIVATE</option></select></div>
-    <div class="ctrl"><label>Asset Class</label><select id="fAsset"></select></div>
-    <div class="ctrl"><label>Country</label><select id="fCountry"></select></div>
-    <div class="ctrl"><label>Class</label><select id="fClass"><option value="">ABCP & Non-ABCP</option><option value="NON_ABCP">Non-ABCP</option><option value="ABCP">ABCP</option></select></div>
-    <div class="ctrl"><label>Year</label><select id="fYear"></select></div>
+    <div class="ctrl"><label>Search</label><input type="text" id="fSearch" placeholder="Deal, originator, ISIN…"></div>
+    <div class="ctrl"><label>Asset Class</label><select id="fAsset"><option value="">All</option></select></div>
+    <div class="ctrl"><label>Country</label><select id="fCountry"><option value="">All</option></select></div>
+    <div class="ctrl"><label>ECB Eligible</label><select id="fEcb"><option value="">All</option><option value="yes">Has ECB eligible</option><option value="no">No ECB eligible</option></select></div>
+    <div class="ctrl"><label>Year</label><select id="fYear"><option value="">All</option></select></div>
     <div class="actions">
-      <button class="btn" id="btnReset" onclick="resetFilters()">Reset</button>
-      <button class="btn" id="btnView" onclick="toggleView()">Table View</button>
-      <button class="btn btn-accent" onclick="exportCSV()">Export CSV</button>
+      <button class="btn" onclick="resetFilters()">Reset</button>
+      <button class="btn btn-accent" onclick="exportCSV()">⬇ CSV</button>
     </div>
   </div>
-  <div class="panels">
-    <div class="panel"><h3>Asset Class Distribution</h3><canvas id="chartAsset"></canvas></div>
-    <div class="panel"><h3>Country Distribution</h3><canvas id="chartCountry"></canvas></div>
-    <div class="panel"><h3>Notifications by Quarter</h3><canvas id="chartTimeline"></canvas></div>
+
+  <div class="charts" id="chartsSection">
+    <div class="chart-box"><h3>Asset Class Distribution</h3><canvas id="chartAsset"></canvas></div>
+    <div class="chart-box"><h3>Deals by Country</h3><canvas id="chartCountry"></canvas></div>
+    <div class="chart-box"><h3>Top 15 Originators</h3><canvas id="chartOrig"></canvas></div>
+    <div class="chart-box"><h3>ECB Eligibility by Asset Class</h3><canvas id="chartEcb"></canvas></div>
   </div>
-  <div class="results-bar">
-    <span class="results-count" id="resultsCount"></span>
+
+  <div class="result-bar">
+    <div class="result-count" id="resultCount"></div>
+    <div class="view-toggle">
+      <button class="btn active" id="btnCards" onclick="setView('cards')">Cards</button>
+      <button class="btn" id="btnTable" onclick="setView('table')">Table</button>
+    </div>
   </div>
-  <div class="cards-grid" id="cardsGrid"></div>
-  <div class="tbl-wrap" id="tableWrap"><table id="dataTable"></table></div>
-  <div class="disclaimer"><strong>Source:</strong> European Securities and Markets Authority (ESMA) — STS Securitisation Register API. This dashboard is an independent resource and is not affiliated with ESMA or any EU institution. Data is publicly available from the ESMA STS register.</div>
-  <div class="footer">Built by <a href="#">David Sánchez</a> · Securitisation Market Intelligence · <a href="#">Titus Project</a></div>
+
+  <div id="viewCards" class="cards"></div>
+  <div id="viewTable" class="table-wrap" style="display:none"></div>
 </div>
 
-<!-- Modal -->
-<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <h2 id="mTitle"></h2>
-    <div class="modal-sub" id="mSub"></div>
-    <div class="modal-badges" id="mBadges"></div>
-    <div class="modal-grid" id="mGrid"></div>
-    <div id="mIsins"></div>
-  </div>
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal"></div>
 </div>
+
+<div class="toast" id="toast"></div>
+
+<footer class="footer">
+  Sources: <a href="https://www.esma.europa.eu/securitisation" target="_blank">ESMA STS Register API</a> · <a href="https://www.ecb.europa.eu/paym/coll/assets/html/index.en.html" target="_blank">ECB Eligible Collateral List</a><br>
+  Data provided for informational purposes only. Not investment advice.<br>
+  Built by <b>David Sanchez</b> · Titus Project
+</footer>
 
 <script>
-const ASSET_COLORS={'auto loans/leases':'#4488ff','residential mortgages':'#22cc88','trade receivables':'#ff8844','credit facilities provided to individuals for personal, family or household consumption purposes':'#bb66ee','credit facilities, including loans and leases, provided to any type of enterprise or corporation':'#ff6688','credit card receivables':'#44ddcc','commercial mortgages':'#f0a030','others':'#888888','':'#555555'};
-const ASSET_SHORT={'auto loans/leases':'Auto','residential mortgages':'RMBS','trade receivables':'Trade Receivables','credit facilities provided to individuals for personal, family or household consumption purposes':'Consumer','credit facilities, including loans and leases, provided to any type of enterprise or corporation':'SME/Corporate','credit card receivables':'Credit Card','commercial mortgages':'CMBS','others':'Other','':'Unspecified'};
+const AC_MAP = {
+  'auto loans/leases': 'Auto ABS',
+  'residential mortgages': 'RMBS',
+  'credit facilities provided to individuals for personal, family or household consumption purposes': 'Consumer ABS',
+  'credit facilities, including loans and leases, provided to any type of enterprise or corporation': 'SME ABS',
+  'credit card receivables': 'Credit Card ABS',
+  'commercial mortgages': 'CMBS',
+  'others': 'Other'
+};
+const AC_COLORS = {'Auto ABS':'#4488ff','RMBS':'#22cc88','Consumer ABS':'#bb66ee','SME ABS':'#ff6688','Credit Card ABS':'#44ddcc','CMBS':'#ff8844','Other':'#888'};
+const FLAG_MAP = {NETHERLANDS:'🇳🇱',BELGIUM:'🇧🇪',FRANCE:'🇫🇷',GERMANY:'🇩🇪',SPAIN:'🇪🇸',ITALY:'🇮🇹',IRELAND:'🇮🇪',PORTUGAL:'🇵🇹',LUXEMBOURG:'🇱🇺',GREECE:'🇬🇷',FINLAND:'🇫🇮',AUSTRIA:'🇦🇹',LITHUANIA:'🇱🇹',LATVIA:'🇱🇻',CROATIA:'🇭🇷',POLAND:'🇵🇱',CYPRUS:'🇨🇾','UNITED KINGDOM':'🇬🇧',SWEDEN:'🇸🇪',DENMARK:'🇩🇰',NORWAY:'🇳🇴',MALTA:'🇲🇹',SLOVAKIA:'🇸🇰',CZECH:'🇨🇿',SLOVENIA:'🇸🇮',ROMANIA:'🇷🇴',BULGARIA:'🇧🇬',HUNGARY:'🇭🇺',ESTONIA:'🇪🇪'};
 
-let ALL=[], filtered=[], viewMode='cards';
-let chartAsset, chartCountry, chartTimeline;
+let DATA = [], filtered = [], charts = {};
+let currentView = 'cards';
+let sortCol = null, sortDir = 1;
 
-async function init(){
-  const r=await fetch('data/esma_sts_api_full.json');
-  const text=await r.text();
-  const clean=text.charCodeAt(0)===0xFEFF?text.slice(1):text;
-  const json=JSON.parse(clean);
-  ALL=json.response.docs.map(d=>({
-    id:d.id,
-    name:Array.isArray(d.stsre_sec_name)?d.stsre_sec_name[0]:(d.stsre_sec_name||''),
-    classCode:d.stsre_secclass_code||'',
-    typeCode:d.stsre_sectype_code||'',
-    asset:d.stsre_undrlexp_desc||'',
-    date:d.stsre_notif_dt?d.stsre_notif_dt.slice(0,10):'',
-    compliance:d.stsre_compl_stat_desc||'',
-    originator:d.de_name?d.de_name.trim():'',
-    originatorLEI:d.de_lei_name||'',
-    country:d.prospectus_country_name||'',
-    repository:Array.isArray(d.stsre_sec_repository)?d.stsre_sec_repository[0]:(d.stsre_sec_repository||''),
-    issins:d.concatenated_issins||'',
-    issinPreview:d.first_five_concatenated_issins||'',
-    riskRetention:d.non_abcp_Riskretention_and_RetainingRiskoption_Retainingentityname||'',
-    sanction:d.stsre_sanc_status||'',
-    verifier:d.authorised_third_party_name||''
+function normAC(raw) { return AC_MAP[(raw||'').toLowerCase()] || AC_MAP['others'] || 'Other'; }
+function normCountry(c) { return c ? c.replace(/\b\w/g, l => l.toUpperCase()).replace(/\bOf\b/,'of').replace(/\bAnd\b/,'and') : 'N/A'; }
+function titleCase(s) { return s ? s.split(' ').map(w => w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ') : ''; }
+function fmtDate(d) { return d ? d.slice(0,10) : ''; }
+function flag(c) { return FLAG_MAP[(c||'').toUpperCase()] || ''; }
+
+fetch('data/sts_enriched.json').then(r=>r.json()).then(raw => {
+  DATA = raw.map(d => ({
+    ...d,
+    ac: normAC(d.asset_class),
+    ctry: d.country || '',
+    ctryDisplay: normCountry(d.country),
+    date: fmtDate(d.notification_date),
+    year: d.notification_date ? d.notification_date.slice(0,4) : '',
+    totalTr: d.tranches ? d.tranches.length : 0,
+    ecbTr: d.tranches ? d.tranches.filter(t=>t.ecb_eligible).length : 0,
+    isins: d.tranches ? d.tranches.map(t=>t.isin).join(' ') : ''
   }));
-  buildFilters();
+  initFilters();
   applyFilters();
+});
+
+function initFilters() {
+  const acs = [...new Set(DATA.map(d=>d.ac))].sort();
+  const countries = [...new Set(DATA.map(d=>d.ctryDisplay))].filter(c=>c!=='N/A').sort();
+  const years = [...new Set(DATA.map(d=>d.year))].filter(Boolean).sort().reverse();
+  const selAC = document.getElementById('fAsset');
+  acs.forEach(a => { const o = document.createElement('option'); o.value=a; o.textContent=a; selAC.appendChild(o); });
+  const selC = document.getElementById('fCountry');
+  countries.forEach(c => { const o = document.createElement('option'); o.value=c; o.textContent=c; selC.appendChild(o); });
+  const selY = document.getElementById('fYear');
+  years.forEach(y => { const o = document.createElement('option'); o.value=y; o.textContent=y; selY.appendChild(o); });
+  document.getElementById('fSearch').addEventListener('input', applyFilters);
+  document.getElementById('fAsset').addEventListener('change', applyFilters);
+  document.getElementById('fCountry').addEventListener('change', applyFilters);
+  document.getElementById('fEcb').addEventListener('change', applyFilters);
+  document.getElementById('fYear').addEventListener('change', applyFilters);
 }
 
-function buildFilters(){
-  const assets=new Set(), countries=new Set(), years=new Set();
-  ALL.forEach(d=>{
-    if(d.asset)assets.add(d.asset);
-    if(d.country)countries.add(d.country);
-    if(d.date)years.add(d.date.slice(0,4));
-  });
-  const fAsset=document.getElementById('fAsset');
-  fAsset.innerHTML='<option value="">All Asset Classes</option>'+[...assets].sort().map(a=>`<option value="${a}">${ASSET_SHORT[a]||a}</option>`).join('');
-  const fCountry=document.getElementById('fCountry');
-  fCountry.innerHTML='<option value="">All Countries</option>'+[...countries].sort().map(c=>`<option>${c}</option>`).join('');
-  const fYear=document.getElementById('fYear');
-  fYear.innerHTML='<option value="">All Years</option>'+[...years].sort().reverse().map(y=>`<option>${y}</option>`).join('');
-  document.querySelectorAll('.filters select, .filters input').forEach(el=>el.addEventListener('input',applyFilters));
-}
-
-function applyFilters(){
-  const search=document.getElementById('fSearch').value.toLowerCase();
-  const type=document.getElementById('fType').value;
-  const asset=document.getElementById('fAsset').value;
-  const country=document.getElementById('fCountry').value;
-  const cls=document.getElementById('fClass').value;
-  const year=document.getElementById('fYear').value;
-  filtered=ALL.filter(d=>{
-    if(search&&!d.name.toLowerCase().includes(search)&&!d.originator.toLowerCase().includes(search)&&!d.issins.toLowerCase().includes(search))return false;
-    if(type&&d.typeCode!==type)return false;
-    if(asset&&d.asset!==asset)return false;
-    if(country&&d.country!==country)return false;
-    if(cls&&d.classCode!==cls)return false;
-    if(year&&!d.date.startsWith(year))return false;
+function applyFilters() {
+  const q = document.getElementById('fSearch').value.toLowerCase().trim();
+  const ac = document.getElementById('fAsset').value;
+  const ctry = document.getElementById('fCountry').value;
+  const ecb = document.getElementById('fEcb').value;
+  const year = document.getElementById('fYear').value;
+  filtered = DATA.filter(d => {
+    if (ac && d.ac !== ac) return false;
+    if (ctry && d.ctryDisplay !== ctry) return false;
+    if (ecb === 'yes' && d.ecbTr === 0) return false;
+    if (ecb === 'no' && d.ecbTr > 0) return false;
+    if (year && d.year !== year) return false;
+    if (q) {
+      const hay = (d.name + ' ' + d.originator + ' ' + d.isins + ' ' + d.ac + ' ' + d.ctryDisplay).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
     return true;
   });
   renderStats();
   renderCharts();
-  renderResults();
+  renderView();
 }
 
-function resetFilters(){
-  document.getElementById('fSearch').value='';
-  document.querySelectorAll('.filters select').forEach(s=>s.selectedIndex=0);
+function resetFilters() {
+  document.getElementById('fSearch').value = '';
+  document.getElementById('fAsset').value = '';
+  document.getElementById('fCountry').value = '';
+  document.getElementById('fEcb').value = '';
+  document.getElementById('fYear').value = '';
   applyFilters();
 }
 
-function renderStats(){
-  const pub=filtered.filter(d=>d.typeCode==='PUBLIC').length;
-  const assets=new Set(filtered.map(d=>d.asset).filter(Boolean));
-  const countries=new Set(filtered.map(d=>d.country).filter(Boolean));
-  const isins=filtered.reduce((s,d)=>s+(d.issins?d.issins.split(',').length:0),0);
-  document.getElementById('stats').innerHTML=`
-    <div class="stat"><div class="val">${filtered.length.toLocaleString()}</div><div class="lbl">STS Deals</div></div>
-    <div class="stat"><div class="val">${pub.toLocaleString()}</div><div class="lbl">Public</div></div>
-    <div class="stat"><div class="val">${assets.size}</div><div class="lbl">Asset Classes</div></div>
-    <div class="stat"><div class="val">${countries.size}</div><div class="lbl">Countries</div></div>
-    <div class="stat"><div class="val">${isins.toLocaleString()}</div><div class="lbl">Total ISINs</div></div>
-  `;
+function renderStats() {
+  const totalTr = filtered.reduce((s,d) => s+d.totalTr, 0);
+  const ecbTr = filtered.reduce((s,d) => s+d.ecbTr, 0);
+  const acs = new Set(filtered.map(d=>d.ac)).size;
+  const countries = new Set(filtered.filter(d=>d.ctry).map(d=>d.ctryDisplay)).size;
+  const origs = new Set(filtered.map(d=>d.originator)).size;
+  document.getElementById('stats').innerHTML = [
+    ['Deals', filtered.length],
+    ['Tranches', totalTr.toLocaleString()],
+    ['ECB Eligible', ecbTr.toLocaleString()],
+    ['Asset Classes', acs],
+    ['Countries', countries],
+    ['Originators', origs]
+  ].map(([l,v]) => `<div class="stat"><div class="val">${v}</div><div class="lbl">${l}</div></div>`).join('');
 }
 
-function renderCharts(){
-  const assetCounts={};
-  filtered.forEach(d=>{const k=d.asset||'';assetCounts[k]=(assetCounts[k]||0)+1;});
-  const assetEntries=Object.entries(assetCounts).sort((a,b)=>b[1]-a[1]);
+function renderCharts() {
+  const acCount = {}; filtered.forEach(d => { acCount[d.ac] = (acCount[d.ac]||0)+1; });
+  const acLabels = Object.keys(acCount).sort((a,b) => acCount[b]-acCount[a]);
+  const acData = acLabels.map(a => acCount[a]);
+  const acColors = acLabels.map(a => AC_COLORS[a]||'#888');
 
-  const countryCounts={};
-  filtered.forEach(d=>{if(d.country)countryCounts[d.country]=(countryCounts[d.country]||0)+1;});
-  const countryEntries=Object.entries(countryCounts).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const ctryCount = {}; filtered.forEach(d => { const c=d.ctryDisplay; if(c!=='N/A') ctryCount[c]=(ctryCount[c]||0)+1; });
+  const ctryLabels = Object.keys(ctryCount).sort((a,b) => ctryCount[b]-ctryCount[a]);
+  const ctryData = ctryLabels.map(c => ctryCount[c]);
 
-  const qCounts={};
-  filtered.forEach(d=>{
-    if(!d.date)return;
-    const y=d.date.slice(0,4),m=parseInt(d.date.slice(5,7));
-    const q=y+'Q'+Math.ceil(m/3);
-    qCounts[q]=(qCounts[q]||0)+1;
+  const origCount = {}; filtered.forEach(d => { origCount[d.originator]=(origCount[d.originator]||0)+1; });
+  const origEntries = Object.entries(origCount).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  const origLabels = origEntries.map(e => e[0].length>30 ? e[0].slice(0,28)+'…' : e[0]);
+  const origData = origEntries.map(e => e[1]);
+
+  const ecbByAC = {};
+  filtered.forEach(d => {
+    if (!ecbByAC[d.ac]) ecbByAC[d.ac] = {eligible:0, nonEligible:0};
+    d.tranches.forEach(t => {
+      if (t.ecb_eligible) ecbByAC[d.ac].eligible++;
+      else ecbByAC[d.ac].nonEligible++;
+    });
   });
-  const qEntries=Object.entries(qCounts).sort((a,b)=>a[0].localeCompare(b[0]));
+  const ecbLabels = Object.keys(ecbByAC).sort((a,b) => (ecbByAC[b].eligible+ecbByAC[b].nonEligible)-(ecbByAC[a].eligible+ecbByAC[a].nonEligible));
+  const ecbElig = ecbLabels.map(a => ecbByAC[a].eligible);
+  const ecbNon = ecbLabels.map(a => ecbByAC[a].nonEligible);
 
-  const chartOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888894',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#888894',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}}};
+  const defaults = {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
+  const scaleDark = {ticks:{color:'#888894',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}};
 
-  if(chartAsset)chartAsset.destroy();
-  chartAsset=new Chart(document.getElementById('chartAsset'),{type:'bar',data:{labels:assetEntries.map(e=>ASSET_SHORT[e[0]]||e[0]||'N/A'),datasets:[{data:assetEntries.map(e=>e[1]),backgroundColor:assetEntries.map(e=>ASSET_COLORS[e[0]]||'#888'),borderRadius:4,maxBarThickness:40}]},options:{...chartOpts,indexAxis:'y',scales:{...chartOpts.scales,x:{...chartOpts.scales.x},y:{...chartOpts.scales.y,ticks:{...chartOpts.scales.y.ticks,font:{size:10}}}}}});
+  // Destroy old
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
 
-  if(chartCountry)chartCountry.destroy();
-  chartCountry=new Chart(document.getElementById('chartCountry'),{type:'bar',data:{labels:countryEntries.map(e=>e[0]),datasets:[{data:countryEntries.map(e=>e[1]),backgroundColor:'#f0a030',borderRadius:4,maxBarThickness:40}]},options:{...chartOpts,indexAxis:'y'}});
+  charts.asset = new Chart(document.getElementById('chartAsset'), {
+    type:'doughnut', data:{labels:acLabels, datasets:[{data:acData,backgroundColor:acColors,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#e0e0e8',font:{size:11},padding:10,usePointStyle:true,pointStyleWidth:8}},tooltip:{callbacks:{label:c=>c.label+': '+c.raw+' deals'}}}}
+  });
 
-  if(chartTimeline)chartTimeline.destroy();
-  chartTimeline=new Chart(document.getElementById('chartTimeline'),{type:'bar',data:{labels:qEntries.map(e=>e[0]),datasets:[{data:qEntries.map(e=>e[1]),backgroundColor:'rgba(240,160,48,.7)',borderRadius:4,maxBarThickness:30}]},options:{...chartOpts,scales:{...chartOpts.scales,x:{...chartOpts.scales.x,ticks:{...chartOpts.scales.x.ticks,maxRotation:45}}}}});
+  charts.country = new Chart(document.getElementById('chartCountry'), {
+    type:'bar', data:{labels:ctryLabels, datasets:[{data:ctryData,backgroundColor:'rgba(240,160,48,.6)',borderRadius:3}]},
+    options:{...defaults,indexAxis:'y',scales:{x:{...scaleDark},y:{...scaleDark,ticks:{color:'#888894',font:{size:10}}}}}
+  });
+
+  charts.orig = new Chart(document.getElementById('chartOrig'), {
+    type:'bar', data:{labels:origLabels, datasets:[{data:origData,backgroundColor:'rgba(68,136,255,.6)',borderRadius:3}]},
+    options:{...defaults,indexAxis:'y',scales:{x:{...scaleDark},y:{...scaleDark,ticks:{color:'#888894',font:{size:9}}}}}
+  });
+
+  charts.ecb = new Chart(document.getElementById('chartEcb'), {
+    type:'bar', data:{labels:ecbLabels, datasets:[
+      {label:'ECB Eligible',data:ecbElig,backgroundColor:'rgba(34,204,136,.6)',borderRadius:3},
+      {label:'Non-Eligible',data:ecbNon,backgroundColor:'rgba(255,255,255,.1)',borderRadius:3}
+    ]},
+    options:{...defaults,plugins:{legend:{display:true,labels:{color:'#e0e0e8',font:{size:10},usePointStyle:true,pointStyleWidth:8}}},scales:{x:{stacked:true,...scaleDark},y:{stacked:true,...scaleDark}}}
+  });
 }
 
-function getAssetBadge(asset){
-  const short=ASSET_SHORT[asset]||asset||'N/A';
-  const color=ASSET_COLORS[asset]||'#888';
-  return `<span class="badge badge-asset" style="background:${color}18;color:${color};border-color:${color}40">${short}</span>`;
+function setView(v) {
+  currentView = v;
+  document.getElementById('btnCards').classList.toggle('active', v==='cards');
+  document.getElementById('btnTable').classList.toggle('active', v==='table');
+  document.getElementById('viewCards').style.display = v==='cards' ? '' : 'none';
+  document.getElementById('viewTable').style.display = v==='table' ? '' : 'none';
+  renderView();
 }
 
-function renderResults(){
-  document.getElementById('resultsCount').textContent=`${filtered.length} deal${filtered.length!==1?'s':''} found`;
-  if(viewMode==='cards')renderCards();
+function renderView() {
+  document.getElementById('resultCount').innerHTML = `Showing <b>${filtered.length}</b> of <b>${DATA.length}</b> deals`;
+  if (currentView === 'cards') renderCards();
   else renderTable();
 }
 
-function renderCards(){
-  const grid=document.getElementById('cardsGrid');
-  if(!filtered.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--fg2)">No deals match your filters</div>';return;}
-  grid.innerHTML=filtered.slice(0,200).map((d,i)=>{
-    const isinCount=d.issins?d.issins.split(',').length:0;
+function renderCards() {
+  const el = document.getElementById('viewCards');
+  if (filtered.length === 0) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--fg2)">No deals match your filters</div>'; return; }
+  el.innerHTML = filtered.map((d,i) => {
+    const acColor = AC_COLORS[d.ac]||'#888';
+    const ecbBadge = d.ecbTr > 0
+      ? `<span class="badge badge-ecb-yes">${d.ecbTr}/${d.totalTr} ECB</span>`
+      : `<span class="badge badge-ecb-no">No ECB</span>`;
     return `<div class="card" onclick="openModal(${i})">
-      <div class="card-top">
-        <div class="card-title" title="${d.name}">${d.name}</div>
-      </div>
-      <div class="card-originator" title="${d.originator}">${d.originator||'—'}</div>
+      <div class="card-name" title="${esc(d.name)}">${esc(d.name)}</div>
+      <div class="card-orig"><svg viewBox="0 0 24 24"><path d="M3 21V3h18v18H3zm2-2h14V5H5v14zm2-2h4v-4H7v4zm0-6h10V7H7v4zm6 6h4v-4h-4v4z"/></svg>${esc(d.originator)}</div>
       <div class="card-meta">
-        ${getAssetBadge(d.asset)}
-        <span class="badge ${d.typeCode==='PUBLIC'?'badge-public':'badge-private'}">${d.typeCode||'—'}</span>
-        <span class="badge ${d.classCode==='ABCP'?'badge-abcp':'badge-nonabcp'}">${d.classCode==='NON_ABCP'?'Non-ABCP':'ABCP'}</span>
-        ${d.country?`<span class="tag">${d.country}</span>`:''}
+        <span class="badge badge-ac" style="background:${acColor}">${d.ac}</span>
+        <span class="badge badge-tranche">${d.totalTr} tranche${d.totalTr!==1?'s':''}</span>
+        ${ecbBadge}
       </div>
-      <div class="card-footer">
-        <span>${d.date||'—'}</span>
-        <span>${isinCount} ISIN${isinCount!==1?'s':''}</span>
+      <div class="card-bottom">
+        <span class="card-country">${flag(d.ctry)} ${d.ctryDisplay}</span>
+        <span>${d.date}</span>
       </div>
+      ${d.verifier ? `<div class="card-verifier">Verified by ${esc(d.verifier)}</div>` : ''}
     </div>`;
-  }).join('')+(filtered.length>200?`<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--fg2);font-size:12px">Showing 200 of ${filtered.length} deals. Use filters or switch to table view.</div>`:'');
+  }).join('');
 }
 
-function renderTable(){
-  const tbl=document.getElementById('dataTable');
-  tbl.innerHTML=`<thead><tr><th>Deal Name</th><th>Originator</th><th>Asset Class</th><th>Country</th><th>Type</th><th>Class</th><th>Date</th><th>ISINs</th><th>Compliance</th></tr></thead>
-  <tbody>${filtered.map((d,i)=>{
-    const isinCount=d.issins?d.issins.split(',').length:0;
-    return `<tr onclick="openModal(${i})">
-      <td title="${d.name}">${d.name}</td>
-      <td title="${d.originator}">${d.originator||'—'}</td>
-      <td>${ASSET_SHORT[d.asset]||d.asset||'—'}</td>
-      <td>${d.country||'—'}</td>
-      <td>${d.typeCode||'—'}</td>
-      <td>${d.classCode==='NON_ABCP'?'Non-ABCP':'ABCP'}</td>
-      <td>${d.date||'—'}</td>
-      <td>${isinCount}</td>
-      <td>${d.compliance||'—'}</td>
-    </tr>`;
-  }).join('')}</tbody>`;
+function renderTable() {
+  const el = document.getElementById('viewTable');
+  if (filtered.length === 0) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--fg2)">No deals match your filters</div>'; return; }
+  const arrow = col => sortCol===col ? (sortDir===1?' ▲':' ▼') : '';
+  el.innerHTML = `<table class="data-table">
+    <thead><tr>
+      <th onclick="sortTable('name')">Deal${arrow('name')}</th>
+      <th onclick="sortTable('originator')">Originator${arrow('originator')}</th>
+      <th onclick="sortTable('ac')">Asset Class${arrow('ac')}</th>
+      <th onclick="sortTable('ctryDisplay')">Country${arrow('ctryDisplay')}</th>
+      <th onclick="sortTable('date')">Date${arrow('date')}</th>
+      <th onclick="sortTable('totalTr')">Tranches${arrow('totalTr')}</th>
+      <th onclick="sortTable('ecbTr')">ECB Eligible${arrow('ecbTr')}</th>
+    </tr></thead>
+    <tbody>${filtered.map((d,i) => `<tr onclick="openModal(${i})">
+      <td>${esc(d.name)}</td>
+      <td>${esc(d.originator)}</td>
+      <td><span class="badge badge-ac" style="background:${AC_COLORS[d.ac]||'#888'}">${d.ac}</span></td>
+      <td>${flag(d.ctry)} ${d.ctryDisplay}</td>
+      <td>${d.date}</td>
+      <td>${d.totalTr}</td>
+      <td>${d.ecbTr > 0 ? `<span style="color:var(--green)">${d.ecbTr}/${d.totalTr}</span>` : '—'}</td>
+    </tr>`).join('')}</tbody></table>`;
 }
 
-function toggleView(){
-  const btn=document.getElementById('btnView');
-  if(viewMode==='cards'){
-    viewMode='table';
-    btn.textContent='Card View';
-    btn.classList.add('active');
-    document.getElementById('cardsGrid').style.display='none';
-    document.getElementById('tableWrap').style.display='block';
-  }else{
-    viewMode='cards';
-    btn.textContent='Table View';
-    btn.classList.remove('active');
-    document.getElementById('cardsGrid').style.display='grid';
-    document.getElementById('tableWrap').style.display='none';
-  }
-  renderResults();
+function sortTable(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  filtered.sort((a,b) => {
+    let va = a[col], vb = b[col];
+    if (typeof va === 'number') return (va-vb)*sortDir;
+    return String(va||'').localeCompare(String(vb||''))*sortDir;
+  });
+  renderView();
 }
 
-function openModal(idx){
-  const d=filtered[idx];if(!d)return;
-  document.getElementById('mTitle').textContent=d.name;
-  document.getElementById('mSub').textContent=d.originator||'';
-  document.getElementById('mBadges').innerHTML=`
-    ${getAssetBadge(d.asset)}
-    <span class="badge ${d.typeCode==='PUBLIC'?'badge-public':'badge-private'}">${d.typeCode}</span>
-    <span class="badge ${d.classCode==='ABCP'?'badge-abcp':'badge-nonabcp'}">${d.classCode==='NON_ABCP'?'Non-ABCP':'ABCP'}</span>
+function openModal(idx) {
+  const d = filtered[idx];
+  const eligible = d.tranches.filter(t=>t.ecb_eligible);
+  const avgHaircut = eligible.length ? (eligible.reduce((s,t)=>s+parseFloat(t.haircut||0),0)/eligible.length).toFixed(1) : '—';
+
+  document.getElementById('modal').innerHTML = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2>${esc(d.name)}</h2>
+    <div class="modal-sub">
+      <span class="badge badge-ac" style="background:${AC_COLORS[d.ac]||'#888'}">${d.ac}</span>
+      ${flag(d.ctry)} ${d.ctryDisplay} · ${d.date}
+    </div>
+    <div class="modal-info">
+      <div class="modal-info-card">
+        <h4>Originator Details</h4>
+        <p>
+          <span class="lbl">Name:</span> ${esc(d.originator)}<br>
+          <span class="lbl">LEI Entity:</span> ${esc(d.lei||'—')}<br>
+          <span class="lbl">Retention Entity:</span> ${esc(d.retention_entity||'—')}
+        </p>
+      </div>
+      <div class="modal-info-card">
+        <h4>STS Information</h4>
+        <p>
+          <span class="lbl">Verifier:</span> ${esc(d.verifier||'Not specified')}<br>
+          <span class="lbl">Repository:</span> ${esc(d.repository||'—')}<br>
+          <span class="lbl">Deal Type:</span> Public Term (Non-ABCP)
+        </p>
+      </div>
+    </div>
+    <h4 style="font-size:13px;margin-bottom:10px;font-weight:600">Liability Structure — ${d.totalTr} Tranche${d.totalTr!==1?'s':''}</h4>
+    <div style="overflow-x:auto">
+    <table class="tranche-table">
+      <thead><tr>
+        <th>ISIN</th><th>ECB Eligible</th><th>Haircut</th><th>Category</th><th>Currency</th><th>Coupon</th><th>Issuance</th><th>Maturity</th><th>Issuer (SPV)</th>
+      </tr></thead>
+      <tbody>${d.tranches.map(t => {
+        const cls = t.ecb_eligible ? ' class="ecb-row"' : '';
+        return `<tr${cls}>
+          <td><span class="isin-copy" onclick="copyISIN(event,'${t.isin}')">${t.isin}</span></td>
+          <td>${t.ecb_eligible ? '✓ Yes' : '—'}</td>
+          <td>${t.ecb_eligible ? (t.haircut||'—')+'%' : '—'}</td>
+          <td>${t.ecb_eligible ? esc(t.haircut_category||'—') : '—'}</td>
+          <td>${t.ecb_eligible ? esc(t.denomination||'—') : '—'}</td>
+          <td>${t.ecb_eligible && t.coupon_rate ? t.coupon_rate+'%' : '—'}</td>
+          <td>${t.ecb_eligible ? fmtEcbDate(t.issuance_date) : '—'}</td>
+          <td>${t.ecb_eligible ? fmtEcbDate(t.maturity_date) : '—'}</td>
+          <td>${t.ecb_eligible ? esc(t.issuer_name||'—') : '—'}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+    </div>
+    <div class="tranche-summary">
+      <b>${eligible.length}</b> of <b>${d.totalTr}</b> tranches ECB eligible
+      ${eligible.length ? ` · Average haircut: <b>${avgHaircut}%</b>` : ''}
+    </div>
   `;
-  const fields=[
-    ['SPV Country',d.country||'—'],
-    ['Notification Date',d.date||'—'],
-    ['Compliance',d.compliance||'—'],
-    ['Sanction Status',d.sanction||'—'],
-    ['Originator LEI Name',d.originatorLEI||'—'],
-    ['Risk Retention Entity',d.riskRetention||'—'],
-    ['Repository',d.repository||'—'],
-    ['STS Verifier',d.verifier||'—'],
-  ];
-  document.getElementById('mGrid').innerHTML=fields.map(([l,v])=>`<div class="modal-field"><div class="mf-label">${l}</div><div class="mf-value">${v}</div></div>`).join('');
-  const isins=d.issins?d.issins.split(',').map(s=>s.trim()).filter(Boolean):[];
-  document.getElementById('mIsins').innerHTML=isins.length?`<div class="modal-field full" style="margin-top:12px"><div class="mf-label">ISINs (${isins.length})</div><div class="isin-list" style="margin-top:6px">${isins.map(i=>`<span class="isin-tag">${i}</span>`).join('')}</div></div>`:'';
-  document.getElementById('modal').classList.add('open');
-  document.body.style.overflow='hidden';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
-function closeModal(){
-  document.getElementById('modal').classList.remove('open');
-  document.body.style.overflow='';
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
-function exportCSV(){
-  const headers=['Deal Name','Originator','Asset Class','Country','Type','Class','Date','Compliance','Sanction','Risk Retention','ISINs'];
-  const rows=filtered.map(d=>[d.name,d.originator,ASSET_SHORT[d.asset]||d.asset,d.country,d.typeCode,d.classCode,d.date,d.compliance,d.sanction,d.riskRetention,d.issins]);
-  const csv=[headers,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='sts_deals_export.csv';
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+function fmtEcbDate(d) {
+  if (!d) return '—';
+  // Handle DD/MM/YYYY HH:MM:SS format
+  const m = d.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (m) return m[3]+'-'+m[2]+'-'+m[1];
+  return d.slice(0,10);
+}
+
+function copyISIN(e, isin) {
+  e.stopPropagation();
+  navigator.clipboard.writeText(isin);
+  const el = e.target;
+  el.classList.add('copied');
+  showToast('Copied '+isin);
+  setTimeout(() => el.classList.remove('copied'), 1500);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function exportCSV() {
+  const rows = [['Deal','Originator','LEI','Asset Class','Country','Date','Verifier','Repository','Retention Entity','ISIN','ECB Eligible','Haircut','Haircut Category','Currency','Coupon Rate','Issuance Date','Maturity Date','Issuer Name']];
+  filtered.forEach(d => {
+    d.tranches.forEach(t => {
+      rows.push([d.name,d.originator,d.lei,d.ac,d.ctryDisplay,d.date,d.verifier||'',d.repository||'',d.retention_entity||'',
+        t.isin,t.ecb_eligible?'Yes':'No',t.haircut||'',t.haircut_category||'',t.denomination||'',t.coupon_rate||'',
+        t.ecb_eligible?fmtEcbDate(t.issuance_date):'',t.ecb_eligible?fmtEcbDate(t.maturity_date):'',t.issuer_name||''
+      ]);
+    });
+  });
+  const csv = rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sts_securitisations_export.csv';
   a.click();
 }
-
-init();
 </script>
 </body>
 </html>
