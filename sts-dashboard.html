@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>European STS Securitisation Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080810;--bg2:#10101a;--bg3:#181828;--bg4:#222240;--accent:#f0a030;--accent2:#e8922a;--text:#e8e8f0;--text2:#a0a0b8;--text3:#686880;--border:#2a2a44;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.4)}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+input,select,button{font-family:inherit;font-size:.9rem}
+::selection{background:var(--accent);color:var(--bg)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#0a0a18 0%,#141430 50%,#0a0a18 100%);border-bottom:1px solid var(--border);padding:2rem 2rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.header h1{font-size:2rem;font-weight:700;letter-spacing:-.5px;background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem}
+.header .subtitle{color:var(--text2);font-size:.95rem}
+.header .subtitle strong{color:var(--accent);font-weight:600}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(6,1fr);gap:1rem;padding:1.5rem 2rem;max-width:1400px;margin:0 auto}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;text-align:center;transition:border-color .2s,transform .2s}
+.stat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.stat-card .stat-value{font-size:1.6rem;font-weight:700;color:var(--accent);line-height:1.2}
+.stat-card .stat-label{font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem}
+
+/* CONTAINER */
+.container{max-width:1400px;margin:0 auto;padding:0 2rem 2rem}
+
+/* TOOLBAR */
+.toolbar{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;padding:1.2rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem}
+.toolbar input,.toolbar select{background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.55rem .8rem;outline:none;transition:border-color .2s}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--accent)}
+.toolbar input[type=text]{min-width:220px;flex:1}
+.toolbar select{min-width:130px}
+.toolbar input[type=number]{width:110px}
+.toolbar .spacer{flex:1}
+.btn{display:inline-flex;align-items:center;gap:.4rem;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.55rem 1rem;cursor:pointer;transition:all .2s;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn-accent{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
+.btn-accent:hover{background:var(--accent2);border-color:var(--accent2);color:var(--bg)}
+.filter-count{font-size:.8rem;color:var(--text2);padding:.2rem .6rem;background:var(--bg);border-radius:12px;white-space:nowrap}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.5rem}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;position:relative}
+.chart-card h3{font-size:.85rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem;font-weight:600}
+.chart-card canvas{width:100%!important}
+
+/* DEAL CARDS */
+.deals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem}
+.deal-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.2rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.deal-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}
+.deal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:0;transition:opacity .25s}
+.deal-card:hover::before{opacity:1}
+.deal-card .deal-name{font-size:.95rem;font-weight:600;color:#fff;margin-bottom:.5rem;line-height:1.3}
+.deal-card .deal-originator{font-size:.82rem;color:var(--text2);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+.deal-card .deal-meta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.deal-card .deal-meta span{font-size:.75rem;padding:.2rem .55rem;border-radius:5px;white-space:nowrap}
+.badge-ac{color:#fff;font-weight:600}
+.badge-country{background:var(--bg3);color:var(--text2)}
+.badge-size{background:var(--bg3);color:var(--accent);font-weight:600}
+.badge-tranches{background:var(--bg3);color:var(--text2)}
+.badge-rating{background:rgba(34,204,136,.15);color:#22cc88;font-weight:600}
+.badge-date{background:var(--bg3);color:var(--text3);margin-left:auto}
+.badge-redeemed{background:rgba(255,102,136,.12);color:#ff6688;font-weight:500}
+
+/* TABLE VIEW */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:.82rem}
+.table-wrap th{background:var(--bg3);color:var(--text2);text-transform:uppercase;letter-spacing:.3px;font-size:.72rem;font-weight:600;padding:.7rem .8rem;text-align:left;position:sticky;top:0;white-space:nowrap}
+.table-wrap td{padding:.6rem .8rem;border-top:1px solid var(--border);color:var(--text);white-space:nowrap}
+.table-wrap tr{cursor:pointer;transition:background .15s}
+.table-wrap tr:hover{background:rgba(240,160,48,.05)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:2rem}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;max-width:960px;width:100%;max-height:85vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-header{padding:1.5rem 1.5rem 1rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;border-radius:14px 14px 0 0}
+.modal-header h2{font-size:1.15rem;color:#fff;margin-bottom:.3rem}
+.modal-header .modal-sub{font-size:.85rem;color:var(--text2)}
+.modal-close{position:absolute;top:1rem;right:1rem;background:var(--bg3);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:all .2s}
+.modal-close:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.modal-body{padding:1.5rem}
+.modal-section{margin-bottom:1.5rem}
+.modal-section h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:.6rem;font-weight:600}
+.modal-info{display:grid;grid-template-columns:1fr 1fr;gap:.4rem .8rem;font-size:.85rem}
+.modal-info dt{color:var(--text3)}
+.modal-info dd{color:var(--text);font-weight:500}
+.modal-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.modal-table th{background:var(--bg3);color:var(--text2);padding:.6rem .7rem;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.3px;font-weight:600}
+.modal-table td{padding:.55rem .7rem;border-top:1px solid var(--border)}
+.modal-table tr.aaa{background:rgba(34,204,136,.08)}
+.modal-table .isin-copy{cursor:pointer;color:var(--accent);transition:color .15s;position:relative}
+.modal-table .isin-copy:hover{color:#fff}
+.modal-docs a{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .7rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-size:.8rem;margin:.2rem .3rem .2rem 0;transition:all .2s}
+.modal-docs a:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+.copied-toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--bg);padding:.5rem 1.2rem;border-radius:8px;font-size:.85rem;font-weight:600;z-index:2000;opacity:0;transition:opacity .3s}
+.copied-toast.show{opacity:1}
+
+/* FOOTER */
+.footer{text-align:center;padding:2rem;border-top:1px solid var(--border);margin-top:2rem;font-size:.8rem;color:var(--text3);line-height:1.7}
+.footer a{color:var(--accent)}
+.footer .disclaimer{max-width:700px;margin:.5rem auto 0;font-size:.72rem;color:var(--text3);opacity:.7}
+
+/* PAGINATION */
+.pagination{display:flex;justify-content:center;gap:.4rem;padding:1.5rem 0}
+.pagination button{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:.4rem .8rem;border-radius:6px;cursor:pointer;transition:all .2s;font-size:.82rem}
+.pagination button:hover{border-color:var(--accent);color:var(--accent)}
+.pagination button.active{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600}
+.pagination button:disabled{opacity:.3;cursor:default}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .stats-bar{grid-template-columns:repeat(3,1fr)}
+  .charts-grid{grid-template-columns:1fr}
+  .deals-grid{grid-template-columns:1fr}
+  .modal-info{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .toolbar{flex-direction:column}
+  .toolbar input[type=text]{min-width:100%}
+  .header h1{font-size:1.4rem}
+}
+
+.no-results{text-align:center;padding:3rem;color:var(--text3);font-size:1rem}
+.loading{text-align:center;padding:4rem;color:var(--text2);font-size:1.1rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>European STS Securitisation Dashboard</h1>
+  <div class="subtitle"><strong>506</strong> public deals &middot; <strong>1,814</strong> tranches &middot; <strong>EUR 517bn</strong> &middot; Source: <a href="https://www.pcsmarket.org" target="_blank">PCS Market</a></div>
+</div>
+
+<div class="stats-bar" id="statsBar"></div>
+
+<div class="container">
+  <div class="toolbar" id="toolbar">
+    <input type="text" id="searchInput" placeholder="&#128269; Search deal, originator or ISIN...">
+    <select id="filterAC"><option value="">All Asset Classes</option></select>
+    <select id="filterCountry"><option value="">All Countries</option></select>
+    <input type="number" id="filterMinSize" placeholder="Min size (M€)" min="0" step="50">
+    <select id="filterYear"><option value="">All Years</option></select>
+    <select id="filterStatus"><option value="">All Status</option><option value="active">Active</option><option value="redeemed">Redeemed</option></select>
+    <span class="filter-count" id="filterCount"></span>
+    <div class="spacer"></div>
+    <button class="btn" id="btnCards" title="Card view">&#9638; Cards</button>
+    <button class="btn" id="btnTable" title="Table view">&#9776; Table</button>
+    <button class="btn btn-accent" id="btnExport" title="Export filtered deals to CSV">&#11015; CSV</button>
+  </div>
+
+  <div class="charts-grid" id="chartsGrid">
+    <div class="chart-card"><h3>Volume by Asset Class</h3><canvas id="chartAC"></canvas></div>
+    <div class="chart-card"><h3>Volume by Country</h3><canvas id="chartCountry"></canvas></div>
+    <div class="chart-card"><h3>Top 15 Originators</h3><canvas id="chartOriginators"></canvas></div>
+    <div class="chart-card"><h3>Quarterly Issuance</h3><canvas id="chartTimeline"></canvas></div>
+  </div>
+
+  <div id="dealsContainer"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-header"><h2 id="modalTitle"></h2><div class="modal-sub" id="modalSub"></div></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<div class="copied-toast" id="copiedToast">ISIN copied!</div>
+
+<footer class="footer">
+  Source: <a href="https://www.pcsmarket.org" target="_blank">PCS Market</a> (pcsmarket.org)<br>
+  <div class="disclaimer">This dashboard is an independent resource for informational purposes only. It is not affiliated with, endorsed by, or maintained by PCS Market or any regulatory body. Data may not reflect the most current information. No investment advice is provided or implied.</div>
+  Built by <strong>David Sanchez</strong> &middot; Titus Project
+</footer>
+
+<script>
+const AC_MAP = {
+  'Residential Mortgages': 'RMBS',
+  'Auto Loans & Leases': 'Auto ABS',
+  'Consumer Loans': 'Consumer ABS',
+  'Credit Facilities to Enterprises': 'SME ABS',
+  'Credit Cards': 'Credit Card ABS',
+  'Trade Receivables': 'Trade Rec ABS'
+};
+const AC_COLORS = {
+  'Auto ABS': '#4488ff',
+  'RMBS': '#22cc88',
+  'Consumer ABS': '#bb66ee',
+  'SME ABS': '#ff6688',
+  'Credit Card ABS': '#44ddcc',
+  'Trade Rec ABS': '#ff9944',
+  'Other': '#888888'
+};
+const COUNTRY_FLAGS = {
+  'United Kingdom': '🇬🇧', UK: '🇬🇧', Italy: '🇮🇹', Netherlands: '🇳🇱', France: '🇫🇷',
+  Spain: '🇪🇸', Finland: '🇫🇮', Portugal: '🇵🇹', Germany: '🇩🇪', Ireland: '🇮🇪',
+  Belgium: '🇧🇪', Poland: '🇵🇱', Austria: '🇦🇹', Luxembourg: '🇱🇺', Greece: '🇬🇷',
+  'Czech Republic': '🇨🇿', Lithuania: '🇱🇹', Latvia: '🇱🇻', Estonia: '🇪🇪'
+};
+const PAGE_SIZE = 30;
+
+let allDeals = [], filtered = [], currentPage = 1, viewMode = 'cards';
+let chartAC, chartCountry, chartOriginators, chartTimeline;
+
+function normAC(ac) { return AC_MAP[ac] || ac || 'Other'; }
+function acColor(ac) { return AC_COLORS[ac] || AC_COLORS['Other']; }
+function flag(c) { return COUNTRY_FLAGS[c] || '🏳️'; }
+
+function parseDate(d) {
+  if (!d) return null;
+  const p = d.split('-');
+  if (p.length === 3) return new Date(+p[2], +p[1] - 1, +p[0]);
+  return new Date(d);
+}
+
+function fmtSize(v) {
+  if (v == null || v === 0) return '—';
+  if (v >= 1e9) return (v / 1e9).toFixed(1) + 'bn';
+  if (v >= 1e6) return Math.round(v / 1e6) + 'M';
+  if (v >= 1e3) return Math.round(v / 1e3) + 'K';
+  return v.toLocaleString();
+}
+
+function fmtEUR(v) { return v != null && v > 0 ? '€' + fmtSize(v) : '—'; }
+
+function topRating(deal) {
+  const order = ['AAA','Aaa','AA+','Aa1','AA','Aa2','AA-','Aa3','AA (high)','AA (low)','A+','A1','A','A2','A-','A3','BBB+','Baa1','BBB','Baa2','BBB-','Baa3'];
+  let best = null, bestIdx = 999;
+  for (const t of deal.tranches) {
+    if (!t.ratings) continue;
+    for (const r of Object.values(t.ratings)) {
+      const idx = order.indexOf(r);
+      if (idx !== -1 && idx < bestIdx) { bestIdx = idx; best = r; }
+    }
+  }
+  return best;
+}
+
+function isAAA(ratings) {
+  if (!ratings) return false;
+  return Object.values(ratings).some(r => ['AAA','Aaa'].includes(r));
+}
+
+function totalTranches(deals) { return deals.reduce((s, d) => s + d.tranches.length, 0); }
+function totalVolume(deals) { return deals.reduce((s, d) => s + (d.size || 0), 0); }
+
+function init(data) {
+  allDeals = data.map(d => ({ ...d, _ac: normAC(d.asset_class), _date: parseDate(d.date) }));
+  populateFilters();
+  applyFilters();
+  document.getElementById('btnCards').classList.add('active');
+}
+
+function populateFilters() {
+  const acs = [...new Set(allDeals.map(d => d._ac))].sort();
+  const countries = [...new Set(allDeals.map(d => d.country).filter(Boolean))].sort();
+  const years = [...new Set(allDeals.map(d => d._date ? d._date.getFullYear() : null).filter(Boolean))].sort((a, b) => b - a);
+
+  const selAC = document.getElementById('filterAC');
+  acs.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; selAC.appendChild(o); });
+
+  const selC = document.getElementById('filterCountry');
+  countries.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = `${flag(c)} ${c}`; selC.appendChild(o); });
+
+  const selY = document.getElementById('filterYear');
+  years.forEach(y => { const o = document.createElement('option'); o.value = y; o.textContent = y; selY.appendChild(o); });
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const ac = document.getElementById('filterAC').value;
+  const country = document.getElementById('filterCountry').value;
+  const minSize = parseFloat(document.getElementById('filterMinSize').value) * 1e6 || 0;
+  const year = document.getElementById('filterYear').value;
+  const status = document.getElementById('filterStatus').value;
+
+  filtered = allDeals.filter(d => {
+    if (ac && d._ac !== ac) return false;
+    if (country && d.country !== country) return false;
+    if (minSize && (d.size || 0) < minSize) return false;
+    if (year && (!d._date || d._date.getFullYear() !== +year)) return false;
+    if (status === 'redeemed' && !d.redeemed) return false;
+    if (status === 'active' && d.redeemed) return false;
+    if (q) {
+      const hay = [d.spv_name, d.originator, d.pcs_id, d._ac, d.country,
+        ...d.tranches.map(t => t.isin), ...d.tranches.flatMap(t => t.all_isins || [])
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  currentPage = 1;
+  document.getElementById('filterCount').textContent = `${filtered.length} deal${filtered.length !== 1 ? 's' : ''}`;
+  renderStats();
+  renderCharts();
+  renderDeals();
+}
+
+function renderStats() {
+  const countries = new Set(filtered.map(d => d.country).filter(Boolean));
+  const originators = new Set(filtered.map(d => d.originator).filter(Boolean));
+  const acs = new Set(filtered.map(d => d._ac));
+  const stats = [
+    { v: filtered.length, l: 'Total Deals' },
+    { v: totalTranches(filtered).toLocaleString(), l: 'Total Tranches' },
+    { v: '€' + (totalVolume(filtered) / 1e9).toFixed(1) + 'bn', l: 'Volume EUR' },
+    { v: countries.size, l: 'Countries' },
+    { v: originators.size, l: 'Originators' },
+    { v: acs.size, l: 'Asset Classes' }
+  ];
+  document.getElementById('statsBar').innerHTML = stats.map(s =>
+    `<div class="stat-card"><div class="stat-value">${s.v}</div><div class="stat-label">${s.l}</div></div>`
+  ).join('');
+}
+
+const chartDefaults = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#a0a0b8', font: { size: 11 } } } } };
+
+function renderCharts() {
+  // Asset class donut by volume
+  const acVol = {};
+  filtered.forEach(d => { acVol[d._ac] = (acVol[d._ac] || 0) + (d.size || 0); });
+  const acEntries = Object.entries(acVol).sort((a, b) => b[1] - a[1]);
+
+  if (chartAC) chartAC.destroy();
+  chartAC = new Chart(document.getElementById('chartAC'), {
+    type: 'doughnut',
+    data: {
+      labels: acEntries.map(e => e[0]),
+      datasets: [{ data: acEntries.map(e => e[1]), backgroundColor: acEntries.map(e => acColor(e[0])), borderWidth: 0 }]
+    },
+    options: {
+      ...chartDefaults,
+      cutout: '55%',
+      plugins: {
+        ...chartDefaults.plugins,
+        legend: { position: 'right', labels: { color: '#a0a0b8', font: { size: 11 }, padding: 10, usePointStyle: true, pointStyleWidth: 10 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.label}: €${(ctx.raw / 1e9).toFixed(1)}bn`
+          }
+        }
+      }
+    }
+  });
+
+  // Country horizontal bars
+  const cVol = {};
+  filtered.forEach(d => { if (d.country) cVol[d.country] = (cVol[d.country] || 0) + (d.size || 0); });
+  const cEntries = Object.entries(cVol).sort((a, b) => b[1] - a[1]);
+
+  if (chartCountry) chartCountry.destroy();
+  chartCountry = new Chart(document.getElementById('chartCountry'), {
+    type: 'bar',
+    data: {
+      labels: cEntries.map(e => `${flag(e[0])} ${e[0]}`),
+      datasets: [{ data: cEntries.map(e => e[1] / 1e9), backgroundColor: '#f0a030', borderRadius: 4, barThickness: 18 }]
+    },
+    options: {
+      ...chartDefaults,
+      indexAxis: 'y',
+      plugins: { ...chartDefaults.plugins, legend: { display: false }, tooltip: { callbacks: { label: ctx => `€${ctx.raw.toFixed(1)}bn` } } },
+      scales: {
+        x: { ticks: { color: '#686880', callback: v => '€' + v + 'bn' }, grid: { color: '#1a1a30' } },
+        y: { ticks: { color: '#a0a0b8', font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Top 15 originators
+  const oVol = {};
+  filtered.forEach(d => { if (d.originator) oVol[d.originator] = (oVol[d.originator] || 0) + (d.size || 0); });
+  const oEntries = Object.entries(oVol).sort((a, b) => b[1] - a[1]).slice(0, 15);
+
+  if (chartOriginators) chartOriginators.destroy();
+  chartOriginators = new Chart(document.getElementById('chartOriginators'), {
+    type: 'bar',
+    data: {
+      labels: oEntries.map(e => e[0].length > 30 ? e[0].slice(0, 28) + '…' : e[0]),
+      datasets: [{ data: oEntries.map(e => e[1] / 1e9), backgroundColor: '#bb66ee', borderRadius: 4, barThickness: 16 }]
+    },
+    options: {
+      ...chartDefaults,
+      indexAxis: 'y',
+      plugins: { ...chartDefaults.plugins, legend: { display: false }, tooltip: { callbacks: { label: ctx => `€${ctx.raw.toFixed(1)}bn` } } },
+      scales: {
+        x: { ticks: { color: '#686880', callback: v => '€' + v + 'bn' }, grid: { color: '#1a1a30' } },
+        y: { ticks: { color: '#a0a0b8', font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Quarterly issuance stacked
+  const qData = {};
+  const allACs = [...new Set(filtered.map(d => d._ac))].sort();
+  filtered.forEach(d => {
+    if (!d._date) return;
+    const q = `${d._date.getFullYear()} Q${Math.floor(d._date.getMonth() / 3) + 1}`;
+    if (!qData[q]) qData[q] = {};
+    qData[q][d._ac] = (qData[q][d._ac] || 0) + (d.size || 0);
+  });
+  const quarters = Object.keys(qData).sort();
+
+  if (chartTimeline) chartTimeline.destroy();
+  chartTimeline = new Chart(document.getElementById('chartTimeline'), {
+    type: 'bar',
+    data: {
+      labels: quarters,
+      datasets: allACs.map(ac => ({
+        label: ac,
+        data: quarters.map(q => (qData[q]?.[ac] || 0) / 1e9),
+        backgroundColor: acColor(ac),
+        borderRadius: 2
+      }))
+    },
+    options: {
+      ...chartDefaults,
+      plugins: {
+        ...chartDefaults.plugins,
+        legend: { position: 'bottom', labels: { color: '#a0a0b8', font: { size: 10 }, usePointStyle: true, pointStyleWidth: 8, padding: 12 } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: €${ctx.raw.toFixed(1)}bn` } }
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: '#686880', maxRotation: 45, font: { size: 10 } }, grid: { color: '#1a1a30' } },
+        y: { stacked: true, ticks: { color: '#686880', callback: v => '€' + v + 'bn' }, grid: { color: '#1a1a30' } }
+      }
+    }
+  });
+}
+
+function renderDeals() {
+  const container = document.getElementById('dealsContainer');
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="no-results">No deals match your filters.</div>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  if (viewMode === 'cards') {
+    container.innerHTML = '<div class="deals-grid">' + paginated.map((d, i) => {
+      const idx = (currentPage - 1) * PAGE_SIZE + i;
+      const tr = topRating(d);
+      return `<div class="deal-card" onclick="openModal(${idx})">
+        <div class="deal-name">${esc(d.spv_name || d.pcs_id)}</div>
+        <div class="deal-originator">🏦 ${esc(d.originator || '—')}</div>
+        <div class="deal-meta">
+          <span class="badge-ac" style="background:${acColor(d._ac)}">${esc(d._ac)}</span>
+          <span class="badge-country">${flag(d.country)} ${esc(d.country || '')}</span>
+          <span class="badge-size">${fmtEUR(d.size)}</span>
+          <span class="badge-tranches">${d.tranches.length} tranche${d.tranches.length !== 1 ? 's' : ''}</span>
+          ${tr ? `<span class="badge-rating">${esc(tr)}</span>` : ''}
+          ${d.redeemed ? '<span class="badge-redeemed">Redeemed</span>' : ''}
+          <span class="badge-date">${esc(d.date || '')}</span>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+  } else {
+    container.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>SPV Name</th><th>Originator</th><th>Asset Class</th><th>Country</th><th>Size</th><th>Tranches</th><th>Top Rating</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody>${paginated.map((d, i) => {
+        const idx = (currentPage - 1) * PAGE_SIZE + i;
+        return `<tr onclick="openModal(${idx})">
+          <td>${esc(d.spv_name || d.pcs_id)}</td>
+          <td>${esc(d.originator || '—')}</td>
+          <td><span class="badge-ac" style="background:${acColor(d._ac)};font-size:.72rem;padding:.15rem .45rem;border-radius:4px">${esc(d._ac)}</span></td>
+          <td>${flag(d.country)} ${esc(d.country || '')}</td>
+          <td style="text-align:right;color:var(--accent)">${fmtEUR(d.size)}</td>
+          <td style="text-align:center">${d.tranches.length}</td>
+          <td>${esc(topRating(d) || '—')}</td>
+          <td>${esc(d.date || '')}</td>
+          <td>${d.redeemed ? '<span class="badge-redeemed" style="font-size:.72rem;padding:.15rem .45rem;border-radius:4px">Redeemed</span>' : 'Active'}</td>
+        </tr>`;
+      }).join('')}</tbody></table></div>`;
+  }
+
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filtered.length / PAGE_SIZE);
+  if (total <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+  let html = `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">‹</button>`;
+  const range = [];
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || (i >= currentPage - 2 && i <= currentPage + 2)) range.push(i);
+    else if (range[range.length - 1] !== '...') range.push('...');
+  }
+  range.forEach(p => {
+    if (p === '...') html += '<button disabled>…</button>';
+    else html += `<button class="${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+  });
+  html += `<button ${currentPage === total ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">›</button>`;
+  document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(p) { currentPage = p; renderDeals(); window.scrollTo({ top: document.getElementById('dealsContainer').offsetTop - 80, behavior: 'smooth' }); }
+
+function openModal(idx) {
+  const d = filtered[idx];
+  if (!d) return;
+  document.getElementById('modalTitle').textContent = d.spv_name || d.pcs_id;
+  document.getElementById('modalSub').innerHTML = `🏦 ${esc(d.originator || '—')} &middot; <span class="badge-ac" style="background:${acColor(d._ac)};font-size:.75rem;padding:.15rem .5rem;border-radius:4px">${esc(d._ac)}</span> &middot; ${flag(d.country)} ${esc(d.country || '')}`;
+
+  // Get all rating agencies across tranches
+  const allAgencies = [...new Set(d.tranches.flatMap(t => Object.keys(t.ratings || {})))];
+
+  let html = `<div class="modal-section"><h3>Deal Information</h3><dl class="modal-info">
+    <dt>PCS ID</dt><dd>${esc(d.pcs_id)}</dd>
+    <dt>Status</dt><dd>${d.redeemed ? '🔴 Redeemed' : '🟢 Active'}${d.status ? ' — ' + esc(d.status) : ''}</dd>
+    <dt>Date</dt><dd>${esc(d.date || '—')}</dd>
+    <dt>Deal Size</dt><dd style="color:var(--accent);font-weight:700">${fmtEUR(d.size)}</dd>
+    <dt>Originator</dt><dd>${esc(d.originator || '—')}</dd>
+    <dt>SPV</dt><dd>${esc(d.spv_name || '—')}</dd>
+    <dt>Asset Class</dt><dd>${esc(d._ac)}</dd>
+    <dt>Country</dt><dd>${flag(d.country)} ${esc(d.country || '—')}</dd>
+    <dt>Rating Agencies</dt><dd>${(d.rating_agencies || []).join(', ') || '—'}</dd>
+  </dl></div>`;
+
+  html += `<div class="modal-section"><h3>Capital Structure (${d.tranches.length} tranches)</h3>
+    <div style="overflow-x:auto"><table class="modal-table"><thead><tr>
+      <th>Class</th><th>Currency</th><th>Size</th><th>ISIN</th><th>Bloomberg</th>
+      ${allAgencies.map(a => `<th>${esc(a)}</th>`).join('')}
+    </tr></thead><tbody>`;
+
+  d.tranches.forEach(t => {
+    const aaa = isAAA(t.ratings);
+    html += `<tr class="${aaa ? 'aaa' : ''}">
+      <td style="font-weight:600">${esc(t.class || '—')}</td>
+      <td>${esc(t.currency || '—')}</td>
+      <td style="text-align:right;color:var(--accent)">${fmtEUR(t.size)}</td>
+      <td>${t.isin ? `<span class="isin-copy" onclick="copyISIN(event,'${esc(t.isin)}')" title="Click to copy">${esc(t.isin)}</span>` : '—'}</td>
+      <td>${esc(t.bloomberg || '—')}</td>
+      ${allAgencies.map(a => `<td>${esc(t.ratings?.[a] || '—')}</td>`).join('')}
+    </tr>`;
+  });
+  html += '</tbody></table></div></div>';
+
+  if (d.documents && d.documents.length) {
+    html += `<div class="modal-section"><h3>Documents</h3><div class="modal-docs">`;
+    d.documents.forEach(doc => {
+      html += `<a href="${esc(doc.url)}" target="_blank" rel="noopener">📄 ${esc(doc.name)}</a>`;
+    });
+    html += '</div></div>';
+  }
+
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function copyISIN(e, isin) {
+  e.stopPropagation();
+  navigator.clipboard.writeText(isin).then(() => {
+    const toast = document.getElementById('copiedToast');
+    toast.textContent = `${isin} copied!`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1500);
+  });
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function exportCSV() {
+  const headers = ['PCS ID','Date','Status','Originator','SPV','Country','Asset Class','Size EUR','Redeemed','Tranches','Rating Agencies'];
+  const rows = filtered.map(d => [
+    d.pcs_id, d.date, d.status, d.originator, d.spv_name, d.country, d._ac,
+    d.size || '', d.redeemed ? 'Yes' : 'No', d.tranches.length, (d.rating_agencies || []).join('; ')
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `sts_deals_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+}
+
+// Event listeners
+document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
+['filterAC', 'filterCountry', 'filterMinSize', 'filterYear', 'filterStatus'].forEach(id =>
+  document.getElementById(id).addEventListener('change', applyFilters)
+);
+document.getElementById('btnCards').addEventListener('click', () => { viewMode = 'cards'; toggleViewBtns(); renderDeals(); });
+document.getElementById('btnTable').addEventListener('click', () => { viewMode = 'table'; toggleViewBtns(); renderDeals(); });
+document.getElementById('btnExport').addEventListener('click', exportCSV);
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function toggleViewBtns() {
+  document.getElementById('btnCards').classList.toggle('active', viewMode === 'cards');
+  document.getElementById('btnTable').classList.toggle('active', viewMode === 'table');
+}
+
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+// Load data
+document.getElementById('dealsContainer').innerHTML = '<div class="loading">Loading deals…</div>';
+fetch('data/deals_clean.json')
+  .then(r => r.json())
+  .then(init)
+  .catch(e => { document.getElementById('dealsContainer').innerHTML = `<div class="no-results">Error loading data: ${e.message}</div>`; });
+</script>
+</body>
+</html>
