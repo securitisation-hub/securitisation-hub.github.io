@@ -457,7 +457,6 @@ function renderDeals() {
   if (viewMode === 'cards') {
     container.innerHTML = '<div class="deals-grid">' + paginated.map((d, i) => {
       const idx = (currentPage - 1) * PAGE_SIZE + i;
-      const tr = topRating(d);
       return `<div class="deal-card" onclick="openModal(${idx})">
         <div class="deal-name">${esc(d.spv_name || d.pcs_id)}</div>
         <div class="deal-originator">🏦 ${esc(d.originator || '—')}</div>
@@ -466,7 +465,6 @@ function renderDeals() {
           <span class="badge-country">${flag(d.country)} ${esc(d.country || '')}</span>
           <span class="badge-size">${fmtEUR(d.size)}</span>
           <span class="badge-tranches">${d.tranches.length} tranche${d.tranches.length !== 1 ? 's' : ''}</span>
-          ${tr ? `<span class="badge-rating">${esc(tr)}</span>` : ''}
           ${d.redeemed ? '<span class="badge-redeemed">Redeemed</span>' : ''}
           <span class="badge-date">${esc(d.date || '')}</span>
         </div>
@@ -474,7 +472,7 @@ function renderDeals() {
     }).join('') + '</div>';
   } else {
     container.innerHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>SPV Name</th><th>Originator</th><th>Asset Class</th><th>Country</th><th>Size</th><th>Tranches</th><th>Top Rating</th><th>Date</th><th>Status</th></tr></thead>
+      <thead><tr><th>SPV Name</th><th>Originator</th><th>Asset Class</th><th>Country</th><th>Size</th><th>Tranches</th><th>Date</th><th>Status</th></tr></thead>
       <tbody>${paginated.map((d, i) => {
         const idx = (currentPage - 1) * PAGE_SIZE + i;
         return `<tr onclick="openModal(${idx})">
@@ -484,7 +482,6 @@ function renderDeals() {
           <td>${flag(d.country)} ${esc(d.country || '')}</td>
           <td style="text-align:right;color:var(--accent)">${fmtEUR(d.size)}</td>
           <td style="text-align:center">${d.tranches.length}</td>
-          <td>${esc(topRating(d) || '—')}</td>
           <td>${esc(d.date || '')}</td>
           <td>${d.redeemed ? '<span class="badge-redeemed" style="font-size:.72rem;padding:.15rem .45rem;border-radius:4px">Redeemed</span>' : 'Active'}</td>
         </tr>`;
@@ -519,9 +516,6 @@ function openModal(idx) {
   document.getElementById('modalTitle').textContent = d.spv_name || d.pcs_id;
   document.getElementById('modalSub').innerHTML = `🏦 ${esc(d.originator || '—')} &middot; <span class="badge-ac" style="background:${acColor(d._ac)};font-size:.75rem;padding:.15rem .5rem;border-radius:4px">${esc(d._ac)}</span> &middot; ${flag(d.country)} ${esc(d.country || '')}`;
 
-  // Get all rating agencies across tranches
-  const allAgencies = [...new Set(d.tranches.flatMap(t => Object.keys(t.ratings || {})))];
-
   let html = `<div class="modal-section"><h3>Deal Information</h3><dl class="modal-info">
     <dt>PCS ID</dt><dd>${esc(d.pcs_id)}</dd>
     <dt>Status</dt><dd>${d.redeemed ? '🔴 Redeemed' : '🟢 Active'}${d.status ? ' — ' + esc(d.status) : ''}</dd>
@@ -537,18 +531,15 @@ function openModal(idx) {
   html += `<div class="modal-section"><h3>Capital Structure (${d.tranches.length} tranches)</h3>
     <div style="overflow-x:auto"><table class="modal-table"><thead><tr>
       <th>Class</th><th>Currency</th><th>Size</th><th>ISIN</th><th>Bloomberg</th>
-      ${allAgencies.map(a => `<th>${esc(a)}</th>`).join('')}
     </tr></thead><tbody>`;
 
   d.tranches.forEach(t => {
-    const aaa = isAAA(t.ratings);
-    html += `<tr class="${aaa ? 'aaa' : ''}">
+    html += `<tr>
       <td style="font-weight:600">${esc(t.class || '—')}</td>
       <td>${esc(t.currency || '—')}</td>
       <td style="text-align:right;color:var(--accent)">${fmtEUR(t.size)}</td>
       <td>${t.isin ? `<span class="isin-copy" onclick="copyISIN(event,'${esc(t.isin)}')" title="Click to copy">${esc(t.isin)}</span>` : '—'}</td>
       <td>${esc(t.bloomberg || '—')}</td>
-      ${allAgencies.map(a => `<td>${esc(t.ratings?.[a] || '—')}</td>`).join('')}
     </tr>`;
   });
   html += '</tbody></table></div></div>';
