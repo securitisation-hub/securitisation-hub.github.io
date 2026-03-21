@@ -54,7 +54,8 @@ input,select,button{font-family:inherit;font-size:.9rem}
 .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.5rem}
 .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;position:relative}
 .chart-card h3{font-size:.85rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem;font-weight:600}
-.chart-card canvas{width:100%!important}
+.chart-card .chart-wrap{position:relative;width:100%;height:280px}
+.chart-card canvas{width:100%!important;height:100%!important}
 
 /* DEAL CARDS */
 .deals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem}
@@ -163,10 +164,10 @@ input,select,button{font-family:inherit;font-size:.9rem}
   </div>
 
   <div class="charts-grid" id="chartsGrid">
-    <div class="chart-card"><h3>Volume by Asset Class</h3><canvas id="chartAC"></canvas></div>
-    <div class="chart-card"><h3>Volume by Country</h3><canvas id="chartCountry"></canvas></div>
-    <div class="chart-card"><h3>Top 15 Originators</h3><canvas id="chartOriginators"></canvas></div>
-    <div class="chart-card"><h3>Quarterly Issuance</h3><canvas id="chartTimeline"></canvas></div>
+    <div class="chart-card"><h3>Volume by Asset Class</h3><div class="chart-wrap"><canvas id="chartAC"></canvas></div></div>
+    <div class="chart-card"><h3>Volume by Country</h3><div class="chart-wrap"><canvas id="chartCountry"></canvas></div></div>
+    <div class="chart-card"><h3>Top 15 Originators</h3><div class="chart-wrap" style="height:360px"><canvas id="chartOriginators"></canvas></div></div>
+    <div class="chart-card"><h3>Quarterly Issuance</h3><div class="chart-wrap"><canvas id="chartTimeline"></canvas></div></div>
   </div>
 
   <div id="dealsContainer"></div>
@@ -329,7 +330,7 @@ function renderStats() {
   ).join('');
 }
 
-const chartDefaults = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#a0a0b8', font: { size: 11 } } } } };
+const chartDefaults = { responsive: true, maintainAspectRatio: false, animation: { duration: 600 }, plugins: { legend: { labels: { color: '#a0a0b8', font: { size: 11 } } } } };
 
 function renderCharts() {
   // Asset class donut by volume
