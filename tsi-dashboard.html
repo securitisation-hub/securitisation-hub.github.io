@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSI Certified Transactions Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080810;--bg2:#10101a;--bg3:#181828;--bg4:#222240;--accent:#3b82f6;--accent2:#2563eb;--text:#e8e8f0;--text2:#a0a0b8;--text3:#686880;--border:#2a2a44;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.4);--tsi:#3b82f6;--pcs:#f0a030}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+input,select,button{font-family:inherit;font-size:.9rem}
+::selection{background:var(--accent);color:var(--bg)}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* NAV */
+.top-nav{display:flex;justify-content:center;gap:.5rem;padding:.8rem 1rem;background:var(--bg2);border-bottom:1px solid var(--border)}
+.nav-link{padding:.45rem 1.2rem;border-radius:6px;font-size:.85rem;font-weight:500;color:var(--text2);border:1px solid transparent;transition:all .2s}
+.nav-link:hover{color:var(--text);text-decoration:none;border-color:var(--border)}
+.nav-link.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#0a0a18 0%,#0f1a30 50%,#0a0a18 100%);border-bottom:1px solid var(--border);padding:2rem 2rem 1.5rem;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.header h1{font-size:2rem;font-weight:700;letter-spacing:-.5px;background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.3rem}
+.header .subtitle{color:var(--text2);font-size:.95rem}
+.header .subtitle strong{color:var(--accent);font-weight:600}
+
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;padding:1.5rem 2rem;max-width:1400px;margin:0 auto}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;text-align:center;transition:border-color .2s,transform .2s}
+.stat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.stat-card .stat-value{font-size:1.6rem;font-weight:700;color:var(--accent);line-height:1.2}
+.stat-card .stat-label{font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:.2rem}
+
+/* CONTAINER */
+.container{max-width:1400px;margin:0 auto;padding:0 2rem 2rem}
+
+/* TOOLBAR */
+.toolbar{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;padding:1.2rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.5rem}
+.toolbar input,.toolbar select{background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.55rem .8rem;outline:none;transition:border-color .2s}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--accent)}
+.toolbar input[type=text]{min-width:220px;flex:1}
+.toolbar select{min-width:130px}
+.toolbar .spacer{flex:1}
+.btn{display:inline-flex;align-items:center;gap:.4rem;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:.55rem 1rem;cursor:pointer;transition:all .2s;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.btn-accent:hover{background:var(--accent2);border-color:var(--accent2)}
+.filter-count{font-size:.8rem;color:var(--text2);padding:.2rem .6rem;background:var(--bg);border-radius:12px;white-space:nowrap}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.5rem}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.2rem;position:relative}
+.chart-card h3{font-size:.85rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem;font-weight:600}
+.chart-card .chart-wrap{position:relative;width:100%;height:280px}
+.chart-card canvas{width:100%!important;height:100%!important}
+
+/* DEAL CARDS */
+.deals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem}
+.deal-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.2rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.deal-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}
+.deal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:0;transition:opacity .25s}
+.deal-card:hover::before{opacity:1}
+.deal-card .deal-name{font-size:.95rem;font-weight:600;color:#fff;margin-bottom:.5rem;line-height:1.3}
+.deal-card .deal-originator{font-size:.82rem;color:var(--text2);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+.deal-card .deal-meta{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.deal-card .deal-meta span{font-size:.75rem;padding:.2rem .55rem;border-radius:5px;white-space:nowrap}
+.badge-ac{color:#fff;font-weight:600}
+.badge-country{background:var(--bg3);color:var(--text2)}
+.badge-date{background:var(--bg3);color:var(--text3);margin-left:auto}
+.badge-redeemed{background:rgba(255,102,136,.12);color:#ff6688;font-weight:500}
+.badge-active{background:rgba(34,204,136,.12);color:#22cc88;font-weight:500}
+.badge-docs{background:rgba(59,130,246,.12);color:var(--accent);font-weight:500}
+.badge-tsi{background:rgba(59,130,246,.15);color:var(--accent);font-weight:600;font-size:.7rem!important}
+
+/* TABLE VIEW */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+.table-wrap table{width:100%;border-collapse:collapse;font-size:.82rem}
+.table-wrap th{background:var(--bg3);color:var(--text2);text-transform:uppercase;letter-spacing:.3px;font-size:.72rem;font-weight:600;padding:.7rem .8rem;text-align:left;position:sticky;top:0;white-space:nowrap}
+.table-wrap td{padding:.6rem .8rem;border-top:1px solid var(--border);color:var(--text);white-space:nowrap}
+.table-wrap tr{cursor:pointer;transition:background .15s}
+.table-wrap tr:hover{background:rgba(59,130,246,.05)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:2rem}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;max-width:860px;width:100%;max-height:85vh;overflow-y:auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal-header{padding:1.5rem 1.5rem 1rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;border-radius:14px 14px 0 0}
+.modal-header h2{font-size:1.15rem;color:#fff;margin-bottom:.3rem}
+.modal-header .modal-sub{font-size:.85rem;color:var(--text2)}
+.modal-close{position:absolute;top:1rem;right:1rem;background:var(--bg3);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:all .2s}
+.modal-close:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.modal-body{padding:1.5rem}
+.modal-section{margin-bottom:1.5rem}
+.modal-section h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:.6rem;font-weight:600}
+.modal-info{display:grid;grid-template-columns:1fr 1fr;gap:.4rem .8rem;font-size:.85rem}
+.modal-info dt{color:var(--text3)}
+.modal-info dd{color:var(--text);font-weight:500}
+.modal-docs{display:flex;flex-wrap:wrap;gap:.4rem}
+.modal-docs a{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .7rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-size:.78rem;transition:all .2s;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-docs a:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+
+/* FOOTER */
+.footer{text-align:center;padding:2rem;border-top:1px solid var(--border);margin-top:2rem;font-size:.8rem;color:var(--text3);line-height:1.7}
+.footer a{color:var(--accent)}
+.footer .disclaimer{max-width:700px;margin:.5rem auto 0;font-size:.72rem;color:var(--text3);opacity:.7}
+
+/* PAGINATION */
+.pagination{display:flex;justify-content:center;gap:.4rem;padding:1.5rem 0}
+.pagination button{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:.4rem .8rem;border-radius:6px;cursor:pointer;transition:all .2s;font-size:.82rem}
+.pagination button:hover{border-color:var(--accent);color:var(--accent)}
+.pagination button.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.pagination button:disabled{opacity:.3;cursor:default}
+
+.no-results{text-align:center;padding:3rem;color:var(--text3);font-size:1rem}
+.loading{text-align:center;padding:4rem;color:var(--text2);font-size:1.1rem}
+
+@media(max-width:900px){
+  .stats-bar{grid-template-columns:repeat(3,1fr)}
+  .charts-grid{grid-template-columns:1fr}
+  .deals-grid{grid-template-columns:1fr}
+  .modal-info{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .toolbar{flex-direction:column}
+  .toolbar input[type=text]{min-width:100%}
+  .header h1{font-size:1.4rem}
+}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="index.html" class="nav-link">🏠 Hub</a>
+  <a href="sts-dashboard.html" class="nav-link">📊 PCS STS Dashboard</a>
+  <a href="tsi-dashboard.html" class="nav-link active">🇩🇪 TSI Transactions</a>
+  <a href="sts-explorer.html" class="nav-link">🔍 STS Explorer</a>
+</nav>
+
+<div class="header">
+  <h1>🇩🇪 TSI Certified Transactions</h1>
+  <div class="subtitle"><strong id="totalCount">129</strong> certified transactions &middot; Source: <a href="https://www.true-sale-international.de" target="_blank">True Sale International</a></div>
+</div>
+
+<div class="stats-bar" id="statsBar"></div>
+
+<div class="container">
+  <div class="toolbar" id="toolbar">
+    <input type="text" id="searchInput" placeholder="&#128269; Search transaction or originator...">
+    <select id="filterAC"><option value="">All Asset Classes</option></select>
+    <select id="filterCountry"><option value="">All Countries</option></select>
+    <select id="filterStatus"><option value="">All Status</option><option value="active">Active</option><option value="redeemed">Redeemed</option></select>
+    <span class="filter-count" id="filterCount"></span>
+    <div class="spacer"></div>
+    <button class="btn" id="btnCards" title="Card view">▦ Cards</button>
+    <button class="btn" id="btnTable" title="Table view">☰ Table</button>
+    <button class="btn btn-accent" id="btnExport" title="Export to CSV">⬇ CSV</button>
+  </div>
+
+  <div class="charts-grid" id="chartsGrid">
+    <div class="chart-card"><h3>Transactions by Asset Class</h3><div class="chart-wrap"><canvas id="chartAC"></canvas></div></div>
+    <div class="chart-card"><h3>Transactions by Country</h3><div class="chart-wrap"><canvas id="chartCountry"></canvas></div></div>
+    <div class="chart-card"><h3>Top Originators</h3><div class="chart-wrap" style="height:320px"><canvas id="chartOriginators"></canvas></div></div>
+    <div class="chart-card"><h3>Certifications Over Time</h3><div class="chart-wrap"><canvas id="chartTimeline"></canvas></div></div>
+  </div>
+
+  <div id="dealsContainer"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-header"><h2 id="modalTitle"></h2><div class="modal-sub" id="modalSub"></div></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<footer class="footer">
+  Source: <a href="https://www.true-sale-international.de" target="_blank">True Sale International GmbH</a> (true-sale-international.de)<br>
+  <div class="disclaimer">This dashboard is an independent resource for informational purposes only. It is not affiliated with, endorsed by, or maintained by TSI GmbH. Data may not reflect the most current information. No investment advice is provided or implied.</div>
+  Built by <strong>David Sanchez</strong> &middot; Titus Project
+</footer>
+
+<script>
+const AC_COLORS = {
+  'Auto loans': '#4488ff',
+  'Auto leases': '#22cc88',
+  'Consumer loans': '#bb66ee',
+  'Commercial leasing / hire purchase': '#ff6688',
+  'RMBS': '#44ddcc',
+  'CLO': '#ff9944',
+  'CLO/SME': '#ff7744',
+  'CMBS': '#44aaff'
+};
+const COUNTRY_FLAGS = {
+  'Germany': '🇩🇪', 'Spain': '🇪🇸', 'United Kingdom': '🇬🇧', 'Netherlands': '🇳🇱',
+  'France': '🇫🇷', 'Italy': '🇮🇹', 'Japan': '🇯🇵', 'China': '🇨🇳',
+  'Australia': '🇦🇺', 'Brazil': '🇧🇷'
+};
+const PAGE_SIZE = 30;
+
+let allDeals = [], filtered = [], currentPage = 1, viewMode = 'cards';
+let chartAC, chartCountry, chartOriginators, chartTimeline;
+
+function acColor(ac) { return AC_COLORS[ac] || '#888888'; }
+function flag(c) { return COUNTRY_FLAGS[c] || '🏳️'; }
+
+function parseDate(d) {
+  if (!d) return null;
+  const p = d.split('-');
+  if (p.length === 3 && p[0].length <= 2) return new Date(+p[2], +p[1] - 1, +p[0]);
+  return new Date(d);
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function init(data) {
+  allDeals = data.map(d => ({ ...d, _date: parseDate(d.closing_date) }));
+  document.getElementById('totalCount').textContent = allDeals.length;
+  populateFilters();
+  applyFilters();
+  document.getElementById('btnCards').classList.add('active');
+}
+
+function populateFilters() {
+  const acs = [...new Set(allDeals.map(d => d.asset_class))].sort();
+  const countries = [...new Set(allDeals.map(d => d.jurisdiction).filter(Boolean))].sort();
+
+  const selAC = document.getElementById('filterAC');
+  acs.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; selAC.appendChild(o); });
+
+  const selC = document.getElementById('filterCountry');
+  countries.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = `${flag(c)} ${c}`; selC.appendChild(o); });
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const ac = document.getElementById('filterAC').value;
+  const country = document.getElementById('filterCountry').value;
+  const status = document.getElementById('filterStatus').value;
+
+  filtered = allDeals.filter(d => {
+    if (ac && d.asset_class !== ac) return false;
+    if (country && d.jurisdiction !== country) return false;
+    if (status === 'redeemed' && !d.redeemed) return false;
+    if (status === 'active' && d.redeemed) return false;
+    if (q) {
+      const hay = [d.name, d.originator, d.asset_class, d.jurisdiction].filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  currentPage = 1;
+  document.getElementById('filterCount').textContent = `${filtered.length} transaction${filtered.length !== 1 ? 's' : ''}`;
+  renderStats();
+  renderCharts();
+  renderDeals();
+}
+
+function renderStats() {
+  const countries = new Set(filtered.map(d => d.jurisdiction).filter(Boolean));
+  const originators = new Set(filtered.map(d => d.originator).filter(Boolean));
+  const active = filtered.filter(d => !d.redeemed).length;
+  const totalDocs = filtered.reduce((s, d) => s + (d.documents ? d.documents.length : 0), 0);
+  const stats = [
+    { v: filtered.length, l: 'Total Transactions' },
+    { v: active, l: 'Active' },
+    { v: filtered.length - active, l: 'Redeemed' },
+    { v: countries.size, l: 'Countries' },
+    { v: originators.size, l: 'Originators' }
+  ];
+  document.getElementById('statsBar').innerHTML = stats.map(s =>
+    `<div class="stat-card"><div class="stat-value">${s.v}</div><div class="stat-label">${s.l}</div></div>`
+  ).join('');
+}
+
+const chartDefaults = { responsive: true, maintainAspectRatio: false, animation: { duration: 600 }, plugins: { legend: { labels: { color: '#a0a0b8', font: { size: 11 } } } } };
+
+function renderCharts() {
+  // Asset class donut by count
+  const acCount = {};
+  filtered.forEach(d => { acCount[d.asset_class] = (acCount[d.asset_class] || 0) + 1; });
+  const acEntries = Object.entries(acCount).sort((a, b) => b[1] - a[1]);
+
+  if (chartAC) chartAC.destroy();
+  chartAC = new Chart(document.getElementById('chartAC'), {
+    type: 'doughnut',
+    data: {
+      labels: acEntries.map(e => e[0]),
+      datasets: [{ data: acEntries.map(e => e[1]), backgroundColor: acEntries.map(e => acColor(e[0])), borderWidth: 0 }]
+    },
+    options: { ...chartDefaults, cutout: '55%', plugins: { ...chartDefaults.plugins, legend: { position: 'right', labels: { color: '#a0a0b8', font: { size: 11 }, padding: 10, usePointStyle: true, pointStyleWidth: 10 } } } }
+  });
+
+  // Country bars
+  const cCount = {};
+  filtered.forEach(d => { if (d.jurisdiction) cCount[d.jurisdiction] = (cCount[d.jurisdiction] || 0) + 1; });
+  const cEntries = Object.entries(cCount).sort((a, b) => b[1] - a[1]);
+
+  if (chartCountry) chartCountry.destroy();
+  chartCountry = new Chart(document.getElementById('chartCountry'), {
+    type: 'bar',
+    data: {
+      labels: cEntries.map(e => `${flag(e[0])} ${e[0]}`),
+      datasets: [{ data: cEntries.map(e => e[1]), backgroundColor: '#3b82f6', borderRadius: 4, barThickness: 22 }]
+    },
+    options: { ...chartDefaults, indexAxis: 'y', plugins: { ...chartDefaults.plugins, legend: { display: false } }, scales: { x: { ticks: { color: '#686880' }, grid: { color: '#1a1a30' } }, y: { ticks: { color: '#a0a0b8', font: { size: 11 } }, grid: { display: false } } } }
+  });
+
+  // Top originators
+  const oCount = {};
+  filtered.forEach(d => { if (d.originator) oCount[d.originator] = (oCount[d.originator] || 0) + 1; });
+  const oEntries = Object.entries(oCount).sort((a, b) => b[1] - a[1]).slice(0, 12);
+
+  if (chartOriginators) chartOriginators.destroy();
+  chartOriginators = new Chart(document.getElementById('chartOriginators'), {
+    type: 'bar',
+    data: {
+      labels: oEntries.map(e => e[0].length > 35 ? e[0].slice(0, 33) + '…' : e[0]),
+      datasets: [{ data: oEntries.map(e => e[1]), backgroundColor: '#bb66ee', borderRadius: 4, barThickness: 18 }]
+    },
+    options: { ...chartDefaults, indexAxis: 'y', plugins: { ...chartDefaults.plugins, legend: { display: false } }, scales: { x: { ticks: { color: '#686880' }, grid: { color: '#1a1a30' } }, y: { ticks: { color: '#a0a0b8', font: { size: 10 } }, grid: { display: false } } } }
+  });
+
+  // Timeline by year
+  const yData = {};
+  filtered.forEach(d => {
+    if (!d._date) return;
+    const y = d._date.getFullYear();
+    yData[y] = (yData[y] || 0) + 1;
+  });
+  const years = Object.keys(yData).sort();
+
+  if (chartTimeline) chartTimeline.destroy();
+  chartTimeline = new Chart(document.getElementById('chartTimeline'), {
+    type: 'bar',
+    data: {
+      labels: years,
+      datasets: [{ label: 'Certifications', data: years.map(y => yData[y]), backgroundColor: '#3b82f6', borderRadius: 4 }]
+    },
+    options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { display: false } }, scales: { x: { ticks: { color: '#686880' }, grid: { color: '#1a1a30' } }, y: { ticks: { color: '#686880', stepSize: 1 }, grid: { color: '#1a1a30' }, beginAtZero: true } } }
+  });
+}
+
+function renderDeals() {
+  const container = document.getElementById('dealsContainer');
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="no-results">No transactions match your filters.</div>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  if (viewMode === 'cards') {
+    container.innerHTML = '<div class="deals-grid">' + paginated.map((d, i) => {
+      const idx = (currentPage - 1) * PAGE_SIZE + i;
+      const docCount = d.documents ? d.documents.length : 0;
+      return `<div class="deal-card" onclick="openModal(${idx})">
+        <div class="deal-name">${esc(d.name)}</div>
+        <div class="deal-originator">🏦 ${esc(d.originator || '—')}</div>
+        <div class="deal-meta">
+          <span class="badge-ac" style="background:${acColor(d.asset_class)}">${esc(d.asset_class)}</span>
+          <span class="badge-country">${flag(d.jurisdiction)} ${esc(d.jurisdiction || '')}</span>
+          ${d.redeemed ? '<span class="badge-redeemed">Redeemed</span>' : '<span class="badge-active">Active</span>'}
+          ${docCount > 0 ? `<span class="badge-docs">📄 ${docCount} docs</span>` : ''}
+          <span class="badge-tsi">TSI Certified</span>
+          <span class="badge-date">${esc(d.closing_date || '')}</span>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+  } else {
+    container.innerHTML = `<div class="table-wrap"><table>
+      <thead><tr><th>Transaction</th><th>Originator</th><th>Asset Class</th><th>Country</th><th>Closing Date</th><th>Status</th><th>Docs</th></tr></thead>
+      <tbody>${paginated.map((d, i) => {
+        const idx = (currentPage - 1) * PAGE_SIZE + i;
+        return `<tr onclick="openModal(${idx})">
+          <td style="font-weight:600">${esc(d.name)}</td>
+          <td>${esc(d.originator || '—')}</td>
+          <td><span class="badge-ac" style="background:${acColor(d.asset_class)};font-size:.72rem;padding:.15rem .45rem;border-radius:4px">${esc(d.asset_class)}</span></td>
+          <td>${flag(d.jurisdiction)} ${esc(d.jurisdiction || '')}</td>
+          <td>${esc(d.closing_date || '')}</td>
+          <td>${d.redeemed ? '<span class="badge-redeemed" style="font-size:.72rem;padding:.15rem .45rem;border-radius:4px">Redeemed</span>' : '<span class="badge-active" style="font-size:.72rem;padding:.15rem .45rem;border-radius:4px">Active</span>'}</td>
+          <td style="text-align:center">${d.documents ? d.documents.length : 0}</td>
+        </tr>`;
+      }).join('')}</tbody></table></div>`;
+  }
+  renderPagination();
+}
+
+function renderPagination() {
+  const total = Math.ceil(filtered.length / PAGE_SIZE);
+  if (total <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+  let html = `<button ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">‹</button>`;
+  const range = [];
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || (i >= currentPage - 2 && i <= currentPage + 2)) range.push(i);
+    else if (range[range.length - 1] !== '...') range.push('...');
+  }
+  range.forEach(p => {
+    if (p === '...') html += '<button disabled>…</button>';
+    else html += `<button class="${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+  });
+  html += `<button ${currentPage === total ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">›</button>`;
+  document.getElementById('pagination').innerHTML = html;
+}
+
+function goPage(p) { currentPage = p; renderDeals(); window.scrollTo({ top: document.getElementById('dealsContainer').offsetTop - 80, behavior: 'smooth' }); }
+
+function openModal(idx) {
+  const d = filtered[idx];
+  if (!d) return;
+  document.getElementById('modalTitle').textContent = d.name;
+  document.getElementById('modalSub').innerHTML = `🏦 ${esc(d.originator || '—')} &middot; <span class="badge-ac" style="background:${acColor(d.asset_class)};font-size:.75rem;padding:.15rem .5rem;border-radius:4px">${esc(d.asset_class)}</span> &middot; ${flag(d.jurisdiction)} ${esc(d.jurisdiction || '')}`;
+
+  let html = `<div class="modal-section"><h3>Transaction Information</h3><dl class="modal-info">
+    <dt>Transaction Name</dt><dd>${esc(d.name)}</dd>
+    <dt>Originator</dt><dd>${esc(d.originator || '—')}</dd>
+    <dt>Asset Class</dt><dd>${esc(d.asset_class)}</dd>
+    <dt>Jurisdiction</dt><dd>${flag(d.jurisdiction)} ${esc(d.jurisdiction || '—')}</dd>
+    <dt>Closing Date</dt><dd>${esc(d.closing_date || '—')}</dd>
+    <dt>Status</dt><dd>${d.redeemed ? '🔴 Redeemed' : '🟢 Active'}</dd>
+    <dt>Certification</dt><dd><span class="badge-tsi" style="font-size:.8rem;padding:.3rem .6rem">TSI Certified</span></dd>
+    ${d.detail_url ? `<dt>TSI Page</dt><dd><a href="${esc(d.detail_url)}" target="_blank" rel="noopener">View on TSI ↗</a></dd>` : ''}
+  </dl></div>`;
+
+  if (d.documents && d.documents.length > 0) {
+    html += `<div class="modal-section"><h3>Documents (${d.documents.length})</h3><div class="modal-docs">`;
+    d.documents.forEach(doc => {
+      const shortName = doc.name.length > 50 ? doc.name.slice(0, 48) + '…' : doc.name;
+      html += `<a href="${esc(doc.url)}" target="_blank" rel="noopener" title="${esc(doc.name)}">📄 ${esc(shortName)}</a>`;
+    });
+    html += '</div></div>';
+  }
+
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function exportCSV() {
+  const headers = ['Name','Originator','Asset Class','Jurisdiction','Closing Date','Status','TSI URL','Documents'];
+  const rows = filtered.map(d => [
+    d.name, d.originator, d.asset_class, d.jurisdiction, d.closing_date,
+    d.redeemed ? 'Redeemed' : 'Active', d.detail_url || '',
+    (d.documents || []).length
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `tsi_transactions_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+}
+
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+// Event listeners
+document.getElementById('searchInput').addEventListener('input', debounce(applyFilters, 300));
+['filterAC', 'filterCountry', 'filterStatus'].forEach(id =>
+  document.getElementById(id).addEventListener('change', applyFilters)
+);
+document.getElementById('btnCards').addEventListener('click', () => { viewMode = 'cards'; toggleViewBtns(); renderDeals(); });
+document.getElementById('btnTable').addEventListener('click', () => { viewMode = 'table'; toggleViewBtns(); renderDeals(); });
+document.getElementById('btnExport').addEventListener('click', exportCSV);
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function toggleViewBtns() {
+  document.getElementById('btnCards').classList.toggle('active', viewMode === 'cards');
+  document.getElementById('btnTable').classList.toggle('active', viewMode === 'table');
+}
+
+// Load data
+document.getElementById('dealsContainer').innerHTML = '<div class="loading">Loading transactions…</div>';
+fetch('data/tsi_transactions.json')
+  .then(r => r.json())
+  .then(init)
+  .catch(e => { document.getElementById('dealsContainer').innerHTML = `<div class="no-results">Error loading data: ${e.message}</div>`; });
+</script>
+</body>
+</html>
