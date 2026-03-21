@@ -104,6 +104,7 @@ input,select,button{font-family:inherit;font-size:.9rem}
 .modal-info dt{color:var(--text3)}
 .modal-info dd{color:var(--text);font-weight:500}
 .modal-docs{display:flex;flex-wrap:wrap;gap:.4rem}
+.modal-table tr:hover{background:rgba(59,130,246,.05)}
 .modal-docs a{display:inline-flex;align-items:center;gap:.3rem;padding:.35rem .7rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-size:.78rem;transition:all .2s;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .modal-docs a:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
 
@@ -373,6 +374,7 @@ function renderDeals() {
           <span class="badge-ac" style="background:${acColor(d.asset_class)}">${esc(d.asset_class)}</span>
           <span class="badge-country">${flag(d.jurisdiction)} ${esc(d.jurisdiction || '')}</span>
           ${d.redeemed ? '<span class="badge-redeemed">Redeemed</span>' : '<span class="badge-active">Active</span>'}
+          ${d.tranches && d.tranches.length > 0 ? `<span class="badge-docs">${d.tranches.length} tranches</span>` : ''}
           ${docCount > 0 ? `<span class="badge-docs">📄 ${docCount} docs</span>` : ''}
           <span class="badge-tsi">TSI Certified</span>
           <span class="badge-date">${esc(d.closing_date || '')}</span>
@@ -381,7 +383,7 @@ function renderDeals() {
     }).join('') + '</div>';
   } else {
     container.innerHTML = `<div class="table-wrap"><table>
-      <thead><tr><th>Transaction</th><th>Originator</th><th>Asset Class</th><th>Country</th><th>Closing Date</th><th>Status</th><th>Docs</th></tr></thead>
+      <thead><tr><th>Transaction</th><th>Originator</th><th>Asset Class</th><th>Country</th><th>Closing Date</th><th>Status</th><th>Tranches</th><th>Docs</th></tr></thead>
       <tbody>${paginated.map((d, i) => {
         const idx = (currentPage - 1) * PAGE_SIZE + i;
         return `<tr onclick="openModal(${idx})">
@@ -391,6 +393,7 @@ function renderDeals() {
           <td>${flag(d.jurisdiction)} ${esc(d.jurisdiction || '')}</td>
           <td>${esc(d.closing_date || '')}</td>
           <td>${d.redeemed ? '<span class="badge-redeemed" style="font-size:.72rem;padding:.15rem .45rem;border-radius:4px">Redeemed</span>' : '<span class="badge-active" style="font-size:.72rem;padding:.15rem .45rem;border-radius:4px">Active</span>'}</td>
+          <td style="text-align:center">${d.tranches ? d.tranches.length : '—'}</td>
           <td style="text-align:center">${d.documents ? d.documents.length : 0}</td>
         </tr>`;
       }).join('')}</tbody></table></div>`;
@@ -432,15 +435,47 @@ function openModal(idx) {
     <dt>Status</dt><dd>${d.redeemed ? '🔴 Redeemed' : '🟢 Active'}</dd>
     <dt>Certification</dt><dd><span class="badge-tsi" style="font-size:.8rem;padding:.3rem .6rem">TSI Certified</span></dd>
     ${d.detail_url ? `<dt>TSI Page</dt><dd><a href="${esc(d.detail_url)}" target="_blank" rel="noopener">View on TSI ↗</a></dd>` : ''}
+    ${d.esma_compliance ? `<dt>ESMA STS</dt><dd>${esc(d.esma_compliance)}</dd>` : ''}
   </dl></div>`;
 
-  if (d.documents && d.documents.length > 0) {
-    html += `<div class="modal-section"><h3>Documents (${d.documents.length})</h3><div class="modal-docs">`;
-    d.documents.forEach(doc => {
-      const shortName = doc.name.length > 50 ? doc.name.slice(0, 48) + '…' : doc.name;
-      html += `<a href="${esc(doc.url)}" target="_blank" rel="noopener" title="${esc(doc.name)}">📄 ${esc(shortName)}</a>`;
+  // Tranches / ISINs section
+  if (d.tranches && d.tranches.length > 0) {
+    html += `<div class="modal-section"><h3>Capital Structure (${d.tranches.length} tranches)</h3>
+    <div style="overflow-x:auto"><table class="modal-table" style="width:100%;border-collapse:collapse;font-size:.82rem"><thead><tr>
+      <th style="background:var(--bg3);color:var(--text2);padding:.6rem .7rem;text-align:left;font-size:.72rem;text-transform:uppercase">ISIN</th>
+      <th style="background:var(--bg3);color:var(--text2);padding:.6rem .7rem;text-align:left;font-size:.72rem;text-transform:uppercase">Name</th>
+    </tr></thead><tbody>`;
+    d.tranches.forEach(t => {
+      html += `<tr style="border-top:1px solid var(--border)">
+        <td style="padding:.5rem .7rem;font-family:monospace;color:var(--accent);cursor:pointer" onclick="navigator.clipboard.writeText('${esc(t.isin)}').then(()=>alert('Copied: ${esc(t.isin)}'))" title="Click to copy">${esc(t.isin)}</td>
+        <td style="padding:.5rem .7rem">${esc(t.name || '—')}</td>
+      </tr>`;
     });
-    html += '</div></div>';
+    html += '</tbody></table></div></div>';
+  }
+
+  // Documents - separate prospectus from other docs
+  if (d.documents && d.documents.length > 0) {
+    const prospectus = d.documents.filter(doc => /prospectus|offering.circular/i.test(doc.name));
+    const otherDocs = d.documents.filter(doc => !/prospectus|offering.circular/i.test(doc.name));
+    
+    if (prospectus.length > 0) {
+      html += `<div class="modal-section"><h3>📋 Prospectus / Offering Circular</h3><div class="modal-docs">`;
+      prospectus.forEach(doc => {
+        const shortName = doc.name.length > 60 ? doc.name.slice(0, 58) + '…' : doc.name;
+        html += `<a href="${esc(doc.url)}" target="_blank" rel="noopener" title="${esc(doc.name)}" style="border-color:var(--accent);font-weight:600">📋 ${esc(shortName)}</a>`;
+      });
+      html += '</div></div>';
+    }
+    
+    if (otherDocs.length > 0) {
+      html += `<div class="modal-section"><h3>Documents (${otherDocs.length})</h3><div class="modal-docs">`;
+      otherDocs.forEach(doc => {
+        const shortName = doc.name.length > 50 ? doc.name.slice(0, 48) + '…' : doc.name;
+        html += `<a href="${esc(doc.url)}" target="_blank" rel="noopener" title="${esc(doc.name)}">📄 ${esc(shortName)}</a>`;
+      });
+      html += '</div></div>';
+    }
   }
 
   document.getElementById('modalBody').innerHTML = html;

@@ -22,7 +22,36 @@
         "name": "Driver Espana Six Declaration of undertaking",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/Driver_Espana_six/Driver_Espana_Six_Declaration_of_undertaking.pdf"
       }
-    ]
+    ],
+    "esma_id": "4137",
+    "esma_name": "DRIVER MASTER S.A.",
+    "tranches": [
+      {
+        "isin": "XS1258029401"
+      },
+      {
+        "isin": "XS2638442892"
+      },
+      {
+        "isin": "XS2638443197"
+      },
+      {
+        "isin": "XS2638443866"
+      },
+      {
+        "isin": "XS2638444245"
+      }
+    ],
+    "isins": [
+      "XS1258029401",
+      "XS2638442892",
+      "XS2638443197",
+      "XS2638443866",
+      "XS2638444245"
+    ],
+    "esma_notification_date": "2025-06-25T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -103,7 +132,14 @@
         "name": "2022 12 DriverUK MasterC5 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/Driver_UK_Master/Compartment_5/2022/2022_12_DriverUK_MasterC5_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -252,7 +288,24 @@
         "name": "2022 12 SCGA2019-1 Monthly Report",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/SCG_Auto_2019-1/2022/2022_12_SCGA2019-1_Monthly_Report.pdf"
       }
-    ]
+    ],
+    "esma_id": "203",
+    "esma_name": "SC Germany Auto 2019-1",
+    "tranches": [
+      {
+        "isin": "XS2066921466"
+      },
+      {
+        "isin": "XS2066952776"
+      }
+    ],
+    "isins": [
+      "XS2066921466",
+      "XS2066952776"
+    ],
+    "esma_notification_date": "2022-02-01T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -473,7 +526,44 @@
         "name": "2022 12 SCGC2020-1 MonthlyReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/SCG_Consumer_2020-1/2022/2022_12_SCGC2020-1_MonthlyReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "202",
+    "esma_name": "SC Germany Consumer 2020-1",
+    "tranches": [
+      {
+        "isin": "XS2239090785"
+      },
+      {
+        "isin": "XS2239091320"
+      },
+      {
+        "isin": "XS2239091593"
+      },
+      {
+        "isin": "XS2239091759"
+      },
+      {
+        "isin": "XS2239091833"
+      },
+      {
+        "isin": "XS2239091916"
+      },
+      {
+        "isin": "XS2239092138"
+      }
+    ],
+    "isins": [
+      "XS2239090785",
+      "XS2239091320",
+      "XS2239091593",
+      "XS2239091759",
+      "XS2239091833",
+      "XS2239091916",
+      "XS2239092138"
+    ],
+    "esma_notification_date": "2022-02-01T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -694,7 +784,44 @@
         "name": "2022 12 SCGC2021-1 Monthly Report",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/SCG_Consumer_2021-1/2022/2022_12_SCGC2021-1_Monthly_Report.pdf"
       }
-    ]
+    ],
+    "esma_id": "200",
+    "esma_name": "SC Germany Consumer 2021-1",
+    "tranches": [
+      {
+        "isin": "XS2398387071"
+      },
+      {
+        "isin": "XS2398387741"
+      },
+      {
+        "isin": "XS2398388129"
+      },
+      {
+        "isin": "XS2398388632"
+      },
+      {
+        "isin": "XS2398388715"
+      },
+      {
+        "isin": "XS2398389010"
+      },
+      {
+        "isin": "XS2398389440"
+      }
+    ],
+    "isins": [
+      "XS2398387071",
+      "XS2398387741",
+      "XS2398388129",
+      "XS2398388632",
+      "XS2398388715",
+      "XS2398389010",
+      "XS2398389440"
+    ],
+    "esma_notification_date": "2022-02-01T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -875,7 +1002,44 @@
         "name": "2022 12 SCGC2022-1 Monthly Report",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/SCG_Consumer_2022-1/2022/2022_12_SCGC2022-1_Monthly_Report.pdf"
       }
-    ]
+    ],
+    "esma_id": "1538",
+    "esma_name": "SC Germany Consumer 2022-1",
+    "tranches": [
+      {
+        "isin": "XS2482884850"
+      },
+      {
+        "isin": "XS2482885071"
+      },
+      {
+        "isin": "XS2482886046"
+      },
+      {
+        "isin": "XS2482886475"
+      },
+      {
+        "isin": "XS2482886558"
+      },
+      {
+        "isin": "XS2482886632"
+      },
+      {
+        "isin": "XS2482886806"
+      }
+    ],
+    "isins": [
+      "XS2482884850",
+      "XS2482885071",
+      "XS2482886046",
+      "XS2482886475",
+      "XS2482886558",
+      "XS2482886632",
+      "XS2482886806"
+    ],
+    "esma_notification_date": "2023-01-27T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -977,7 +1141,14 @@
         "name": "2022 12 ABEST16 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/A-BEST_16/2022/2022_12_ABEST16_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -1190,7 +1361,14 @@
         "name": "2022 12 ABEST19 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/A-BEST_19/2022/2022_12_ABEST19_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -1415,7 +1593,14 @@
         "name": "2022 12 ABEST 21 Investor Report",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/A-BEST_21/2022/2022_12_ABEST_21_Investor_Report.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -1548,7 +1733,14 @@
         "name": "2022 12 BavSky Leases6 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Leases_6/2022/2022_12_BavSky_Leases6_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -1709,7 +1901,14 @@
         "name": "2022 12 BavSky Leases7 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Leases_7/2022/2022_12_BavSky_Leases7_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -1814,7 +2013,14 @@
         "name": "2022 12 BavSky Loans 9 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Loans_9/2022/2022_12_BavSky_Loans_9_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -1927,7 +2133,14 @@
         "name": "2022 12 BavSky Loans 10 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Loans_10/2022/2022_12_BavSky_Loans_10_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -2132,7 +2345,24 @@
         "name": "2022 12 BavSky Loans 11 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Loans_11/2022/2022_12_BavSky_Loans_11_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "934",
+    "esma_name": "Bavarian Sky Compartment German Auto Loans 11",
+    "tranches": [
+      {
+        "isin": "XS2464345656"
+      },
+      {
+        "isin": "XS2464377345"
+      }
+    ],
+    "isins": [
+      "XS2464345656",
+      "XS2464377345"
+    ],
+    "esma_notification_date": "2022-05-20T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -2289,7 +2519,24 @@
         "name": "2023 10 BavSky Loans 12 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Loans_12/2023/2023_10_BavSky_Loans_12_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "1658",
+    "esma_name": "Bavarian Sky Compartment German Auto Loans 12",
+    "tranches": [
+      {
+        "isin": "XS2583638924"
+      },
+      {
+        "isin": "XS2583641803"
+      }
+    ],
+    "isins": [
+      "XS2583638924",
+      "XS2583641803"
+    ],
+    "esma_notification_date": "2023-03-20T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -2366,7 +2613,14 @@
         "name": "2022 12 Limes2019-1 Investor Report",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/Limes_2019-1/2022/2022_12_Limes2019-1_Investor_Report.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -2539,7 +2793,14 @@
         "name": "2022 12 Limes2021-1 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/Limes_2021-1/2022/2022_12_Limes2021-1_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -2564,7 +2825,14 @@
         "name": "PBD Germany Auto 2018 Declaration of undertaking",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/PBD_Germany_Auto_2018/PBD_Germany_Auto_2018_Declaration_of_undertaking.pdf"
       }
-    ]
+    ],
+    "esma_id": "3967",
+    "esma_name": "",
+    "tranches": [],
+    "isins": [],
+    "esma_notification_date": "2025-05-19T00:00:00Z",
+    "esma_compliance": "Non - Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -2665,7 +2933,24 @@
         "name": "2022 12 PBDGAL2021 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/PBD_Germany_Auto_Loan_2021/2022/2022_12_PBDGAL2021_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "869",
+    "esma_name": "PBD Germany Auto Loan 2021",
+    "tranches": [
+      {
+        "isin": "XS2279552520"
+      },
+      {
+        "isin": "XS2279552876"
+      }
+    ],
+    "isins": [
+      "XS2279552520",
+      "XS2279552876"
+    ],
+    "esma_notification_date": "2022-04-28T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -2790,7 +3075,24 @@
         "name": "2024 12 BavSky Leases8 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Leases_8/2024/2024_12_BavSky_Leases8_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "2320",
+    "esma_name": "Bavarian Sky Compartment German Auto Leases 8",
+    "tranches": [
+      {
+        "isin": "XS2701658937"
+      },
+      {
+        "isin": "XS2701659158"
+      }
+    ],
+    "isins": [
+      "XS2701658937",
+      "XS2701659158"
+    ],
+    "esma_notification_date": "2023-11-22T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -2907,7 +3209,24 @@
         "name": "2024 12 BavSky Loans 13 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Loans_13/2024/2024_12_BavSky_Loans_13_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "2647",
+    "esma_name": "Bavarian Sky Compartment German Auto Loans 13",
+    "tranches": [
+      {
+        "isin": "XS2743720109"
+      },
+      {
+        "isin": "XS2743721172"
+      }
+    ],
+    "isins": [
+      "XS2743720109",
+      "XS2743721172"
+    ],
+    "esma_notification_date": "2024-03-20T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -2980,7 +3299,24 @@
         "name": "2025 12 BavSky Loans 14 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Loans_14/2025/2025_12_BavSky_Loans_14_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3647",
+    "esma_name": "Bavarian Sky Compartment German Auto Loans 14",
+    "tranches": [
+      {
+        "isin": "XS2967178943"
+      },
+      {
+        "isin": "XS2967179164"
+      }
+    ],
+    "isins": [
+      "XS2967178943",
+      "XS2967179164"
+    ],
+    "esma_notification_date": "2025-02-20T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -3041,7 +3377,24 @@
         "name": "2025 12 BavSky Leases9 InvestorReport",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Leases_9/2025/2025_12_BavSky_Leases9_InvestorReport.pdf"
       }
-    ]
+    ],
+    "esma_id": "3969",
+    "esma_name": "Bavarian Sky Compartment German Auto Leases 9",
+    "tranches": [
+      {
+        "isin": "XS3047449874"
+      },
+      {
+        "isin": "XS3047449957"
+      }
+    ],
+    "isins": [
+      "XS3047449874",
+      "XS3047449957"
+    ],
+    "esma_notification_date": "2025-05-20T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
@@ -3062,7 +3415,20 @@
         "name": "BSKY Leases 10 Selbstverpflichtungserklärung FINAL signed",
         "url": "https://www.true-sale-international.de/fileadmin/tsi-gmbh/downloads/Transaktionen/BavSky_Leases_10/BSKY_Leases_10_Selbstverpflichtungserkl%C3%A4rung_FINAL_signed.pdf"
       }
-    ]
+    ],
+    "esma_id": "5357",
+    "esma_name": "Bavarian Sky Compartment German Auto Leases 10",
+    "tranches": [
+      {
+        "isin": "XS3254412755"
+      }
+    ],
+    "isins": [
+      "XS3254412755"
+    ],
+    "esma_notification_date": "2026-02-24T00:00:00Z",
+    "esma_compliance": "Compliant",
+    "esma_type": "PUBLIC"
   },
   {
     "source": "TSI",
