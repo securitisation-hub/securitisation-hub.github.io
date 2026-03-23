@@ -32,4 +32,4 @@ This dashboard is an independent resource for informational purposes only. It is
 
 ## Author
 
-Built by **David Sanchez** · Titus Project
+Built by **David Sanchez**
