@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>European STS Securitisation Register</title>
+<title>European STS Securitisation Register - Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -109,9 +109,9 @@ button{cursor:pointer;font-family:inherit}
 <body>
 
 <div class="header">
-  <h1>European STS Securitisation Register</h1>
+  <h1>European STS Securitisation Register - Dashboard</h1>
   <div class="subtitle" id="headerSub">Loading data…</div>
-  <div class="source">Source: <a href="https://www.esma.europa.eu/securitisation" target="_blank">ESMA - European Securities and Markets Authority</a></div>
+  <div class="source">Source: <a href="https://www.esma.europa.eu/securitisation" target="_blank">ESMA - European Securities and Markets Authority</a> · All data is publicly available · Built by David Sanchez (<a href="https://github.com/securitisation-hub/securitisation-hub.github.io" target="_blank">code</a>)</div>
 </div>
 
 <div class="stats" id="statsBar"></div>
@@ -124,6 +124,7 @@ button{cursor:pointer;font-family:inherit}
   <select id="fClass"><option value="">All Classifications</option><option value="ABCP">ABCP</option><option value="Non-ABCP">Non-ABCP</option></select>
   <select id="fCompliance"><option value="">All Compliance</option><option value="Compliant">Compliant</option><option value="Non-Compliant">Non-Compliant</option></select>
   <select id="fVerifier"><option value="">All Verifiers</option><option value="PCS">PCS</option><option value="SVI">SVI</option><option value="None">None</option></select>
+  <select id="fYear"><option value="">All Years</option></select>
   <span class="filter-count" id="filterCount"></span>
   <span class="spacer"></span>
   <button class="btn active" id="btnCards" onclick="setView('cards')">⊞ Cards</button>
@@ -150,8 +151,7 @@ button{cursor:pointer;font-family:inherit}
 <div class="toast" id="toast"></div>
 
 <div class="footer">
-  Data source: <a href="https://www.esma.europa.eu/securitisation" target="_blank">ESMA</a> · This dashboard is for informational purposes only and does not constitute financial advice.<br>
-  Built by David Sanchez · Titus Project
+  Data source: <a href="https://www.esma.europa.eu/securitisation" target="_blank">ESMA</a> · All data is publicly available · This dashboard is for informational purposes only and does not constitute financial advice.
 </div>
 
 <script>
@@ -174,17 +174,23 @@ fetch('data/esma_sts_deals.json').then(r=>r.json()).then(data=>{
 });
 
 function populateFilters(){
-  const assets=new Set(),countries=new Set();
-  allDeals.forEach(d=>{if(d.asset_class)assets.add(d.asset_class);if(d.country)countries.add(d.country)});
-  const selA=document.getElementById('fAsset'),selC=document.getElementById('fCountry');
+  const assets=new Set(),countries=new Set(),years=new Set();
+  allDeals.forEach(d=>{
+    if(d.asset_class)assets.add(d.asset_class);
+    if(d.country)countries.add(d.country);
+    const dt=d.notification_date||d.initial_date;
+    if(dt)years.add(new Date(dt).getFullYear());
+  });
+  const selA=document.getElementById('fAsset'),selC=document.getElementById('fCountry'),selY=document.getElementById('fYear');
   [...assets].sort().forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;selA.appendChild(o)});
   [...countries].sort().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=flag(c)+' '+c;selC.appendChild(o)});
+  [...years].sort((a,b)=>b-a).forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;selY.appendChild(o)});
 }
 
 /* Filters */
 let searchTimer;
 document.getElementById('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>applyFilters(),300)});
-['fAsset','fCountry','fType','fClass','fCompliance','fVerifier'].forEach(id=>{
+['fAsset','fCountry','fType','fClass','fCompliance','fVerifier','fYear'].forEach(id=>{
   document.getElementById(id).addEventListener('change',()=>applyFilters());
 });
 
@@ -196,6 +202,7 @@ function applyFilters(){
   const fCl=document.getElementById('fClass').value;
   const fCo=document.getElementById('fCompliance').value;
   const fV=document.getElementById('fVerifier').value;
+  const fY=document.getElementById('fYear').value;
 
   filtered=allDeals.filter(d=>{
     if(fA&&d.asset_class!==fA)return false;
@@ -215,6 +222,10 @@ function applyFilters(){
       if(fV==='None'&&v!=='None'&&v!=='')return false;
       if(fV!=='None'&&v!==fV)return false;
     }
+    if(fY){
+      const dt=d.notification_date||d.initial_date;
+      if(!dt||new Date(dt).getFullYear()!==parseInt(fY))return false;
+    }
     if(q){
       const hay=[(d.name||''),(d.originator||''),...(d.tranches||[]).map(t=>t.isin||'')].join(' ').toLowerCase();
       if(!hay.includes(q))return false;
@@ -222,7 +233,7 @@ function applyFilters(){
     return true;
   });
 
-  const activeFilters=[fA,fC,fT,fCl,fCo,fV,q].filter(Boolean).length;
+  const activeFilters=[fA,fC,fT,fCl,fCo,fV,fY,q].filter(Boolean).length;
   document.getElementById('filterCount').textContent=activeFilters?`${activeFilters} filter${activeFilters>1?'s':''} · ${filtered.length} results`:`${filtered.length} deals`;
 
   currentPage=1;
